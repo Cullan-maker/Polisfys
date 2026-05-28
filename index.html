@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Polisfys Taktisk V11</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* TACTICAL DARK THEME */
+        :root {
+            --bg-color: #0b1320; 
+            --surface: #152238; 
+            --surface-light: #1e2f4d;
+            --primary: #3b82f6; 
+            --secondary: #10b981; 
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #2a3b5c;
+            --track-green: #143324;
+            --muscle-primary: #ef4444; 
+            --muscle-secondary: #f59e0b; 
+        }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 75px; }
+        
+        /* Header & Nav */
+        header { background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 15px 20px; text-align: center; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
+        header h1 { margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-main);}
+        header i { color: var(--primary); }
+        
+        nav { position: fixed; bottom: 0; width: 100%; background: var(--surface); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--border); z-index: 100; padding-bottom: calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 15px rgba(0,0,0,0.3);}
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); text-decoration: none; font-size: 0.72rem; width: 25%; cursor: pointer; transition: 0.2s;}
+        .nav-item.active { color: var(--primary); font-weight: 700; }
+        .nav-item i { font-size: 1.3rem; margin-bottom: 5px; }
+        
+        /* Screens */
+        .screen { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards & Rows */
+        .week-card { background: var(--surface); border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.2);}
+        .week-header { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 12px; font-size: 1.1rem; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 10px;}
+        .phase-badge { font-size: 0.75rem; background: rgba(59, 130, 246, 0.2); color: var(--primary); padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .pass-row { display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px dashed var(--border); }
+        .pass-row:last-child { border-bottom: none; padding-bottom: 0;}
+        .pass-row:first-of-type { padding-top: 0;}
+        .pass-info { display: flex; align-items: center; flex: 1; cursor: pointer; }
+        .checkbox { width: 26px; height: 26px; border: 2px solid var(--border); border-radius: 6px; margin-right: 15px; display: flex; align-items: center; justify-content: center; background: var(--bg-color);}
+        .checkbox.checked { background: var(--secondary); border-color: var(--secondary); color: var(--bg-color); }
+        .pass-details h4 { margin: 0; font-size: 1rem; color: var(--text-main);}
+        .pass-details p { margin: 4px 0 0; font-size: 0.8rem; color: var(--text-muted); }
+        
+        /* Buttons */
+        .start-btn { background: var(--primary); color: var(--text-main); border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; text-transform: uppercase;}
+        .info-btn-pass { background: var(--surface-light); color: var(--primary); border: 1px solid var(--border); }
+
+        /* Workout Player (Friskis GO Style) */
+        #workout-player { background: var(--bg-color); min-height: 100vh; position: fixed; top: 0; left: 0; width: 100%; z-index: 200; overflow-y: auto; display: none; flex-direction: column; }
+        
+        .wp-top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10;}
+        .wp-top-bar button { background: none; border: none; color: var(--text-main); font-size: 1.2rem; cursor: pointer;}
+        .wp-top-bar .title { font-weight: 600; font-size: 1.1rem; }
+
+        .ex-media-placeholder { background: linear-gradient(135deg, #1e2f4d 0%, #0b1320 100%); height: 200px; display: flex; justify-content: center; align-items: center; font-size: 4rem; color: rgba(255,255,255,0.1); border-bottom: 1px solid var(--border);}
+        
+        .ex-details { padding: 20px; text-align: center;}
+        .ex-details h2 { margin: 0 0 5px 0; font-size: 1.6rem; color: var(--text-main); }
+        .ex-details p { margin: 0 0 10px 0; color: var(--text-muted); font-size: 0.95rem; }
+        .ex-details .tactical-link { color: var(--danger); font-size: 0.85rem; text-decoration: none; cursor: pointer; display: inline-block; padding: 5px; }
+
+        /* Stepper UI */
+        .log-section { padding: 20px; background: var(--surface); border-top: 1px solid var(--border); flex: 1;}
+        .log-inputs { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 25px;}
+        
+        .stepper-group { display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 140px;}
+        .stepper-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; text-transform: lowercase; }
+        .stepper { display: flex; align-items: center; background: var(--bg-color); border-radius: 30px; border: 1px solid var(--border); padding: 5px; width: 100%; justify-content: space-between;}
+        .stepper button { background: var(--surface-light); border: none; color: var(--text-main); width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; cursor: pointer;}
+        .stepper button:active { background: var(--primary); }
+        .stepper input { background: none; border: none; color: var(--text-main); font-size: 1.2rem; font-weight: 700; width: 60px; text-align: center; }
+        .stepper input:focus { outline: none; }
+        
+        .multiply-sign { font-size: 1.2rem; color: var(--text-muted); padding-top: 25px; }
+
+        /* History Pills */
+        .history-section { margin-bottom: 25px; text-align: center; }
+        .history-label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; }
+        .pills-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .pill { background: var(--surface-light); color: var(--text-main); padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; border: 1px solid var(--border); display: flex; align-items: center; gap: 5px;}
+        .pill.active { background: var(--secondary); color: var(--bg-color); border-color: var(--secondary); }
+
+        .btn-log-set { background: transparent; color: var(--danger); border: 1px solid var(--danger); width: 100%; padding: 15px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; text-transform: uppercase; margin-bottom: 15px; transition: 0.2s;}
+        .btn-log-set:active { background: rgba(239, 68, 68, 0.1); }
+        
+        .btn-next-ex { background: var(--surface-light); color: var(--text-main); border: 1px solid var(--border); width: 100%; padding: 15px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; text-transform: uppercase;}
+
+        /* Modals & Overlays */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 300; display: none; justify-content: center; align-items: flex-end; padding: 0;}
+        .modal-content { background: var(--surface); padding: 30px 25px calc(30px + env(safe-area-inset-bottom)); border-radius: 24px 24px 0 0; width: 100%; position: relative; border-top: 1px solid var(--border); animation: slideUp 0.3s ease; max-height: 90vh; overflow-y: auto;}
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-close { position: absolute; top: 20px; right: 20px; background: var(--bg-color); border: 1px solid var(--border); border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; color: var(--text-main); display: flex; justify-content: center; align-items: center; z-index: 10;}
+        
+        /* EXERCISE LIST DRAWER */
+        .ex-list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border); cursor: pointer; background: var(--bg-color); margin-bottom: 10px; border-radius: 8px;}
+        .ex-list-item.active { border: 1px solid var(--primary); background: rgba(59, 130, 246, 0.1);}
+        .ex-list-name { font-weight: 700; color: var(--text-main); font-size: 1.1rem;}
+        .ex-list-status { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;}
+        .ex-list-icon { color: var(--primary); font-size: 1.2rem;}
+        
+        /* Tactical Info */
+        .muscle-focus-area { display: flex; gap: 15px; margin: 20px 0; background: var(--bg-color); padding: 15px; border-radius: 12px; border: 1px solid var(--border);}
+        .muscle-icon { width: 60px; height: 60px; background: var(--surface-light); border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 2rem; color: var(--primary);}
+        .muscle-labels { flex: 1; display: flex; flex-direction: column; justify-content: center;}
+        .muscle-label { font-size: 0.85rem; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; font-weight: 600;}
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+        .dot.primary { background: var(--muscle-primary); }
+        .dot.secondary { background: var(--muscle-secondary); }
+
+        /* Timer Overlay */
+        .timer-overlay { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--primary); color: white; padding: 40px 20px calc(40px + env(safe-area-inset-bottom)); border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 400; text-align: center; box-shadow: 0 -10px 30px rgba(0,0,0,0.5);}
+        .timer-overlay.active { transform: translateY(0); }
+        .timer-time { font-size: 5rem; font-weight: 800; margin: 15px 0; font-variant-numeric: tabular-nums; letter-spacing: -2px;}
+        .timer-skip { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 12px 25px; border-radius: 30px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem;}
+
+        /* Simulator & Rest */
+        .sim-controls { background: var(--surface); padding: 25px; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.2); text-align: center;}
+        .sim-controls select { padding: 15px; font-size: 1.1rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 20px; width: 100%; background: var(--bg-color); color: var(--text-main); font-weight: 600;}
+        .sim-stats { display: flex; justify-content: space-around; margin-bottom: 25px; font-size: 1rem; color: var(--primary); font-weight: 800;}
+        .track-container { width: 100%; height: 120px; background: var(--track-green); border-radius: 8px; position: relative; overflow: hidden; border: 2px solid #0f2418;}
+        .track-line { position: absolute; top: 0; bottom: 0; width: 4px; background: rgba(255,255,255,0.6); }
+        .line-start { left: 10%; }
+        .line-end { right: 10%; }
+        .runner { position: absolute; width: 24px; height: 24px; background: var(--primary); border-radius: 50%; top: 50%; transform: translateY(-50%); left: 10%; z-index: 10; transition: left linear; border: 3px solid white;}
+        .btn-sim { padding: 16px; background: var(--secondary); color: var(--bg-color); border: none; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; text-transform: uppercase; font-size: 1.05rem;}
+        .btn-sim.stop { background: var(--danger); color: white;}
+        .flash { animation: flashScreen 0.3s ease; }
+        @keyframes flashScreen { 0% { background-color: rgba(255,255,255,0.2); } 100% { background-color: var(--track-green); } }
+
+        /* Data Sync Styles */
+        .sync-textarea { width: 100%; height: 100px; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-family: monospace; font-size: 0.8rem; margin-top: 10px; resize: none;}
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Polisfys HT25</h1>
+        <i class="fa-solid fa-crosshairs" style="font-size: 1.2rem;"></i>
+    </header>
+
+    <div id="schema" class="screen active">
+        <h2 style="margin-top:0; font-size:1.4rem; border-bottom:2px solid var(--primary); padding-bottom:10px; display:inline-block; text-transform:uppercase;">Träningsschema (v.22 - v.40)</h2>
+        <div id="weeks-container"></div>
+    </div>
+
+    <div id="beep" class="screen">
+        <h2 style="margin-top:0; font-size:1.4rem; border-bottom:2px solid var(--primary); padding-bottom:10px; display:inline-block; text-transform:uppercase;">Taktisk 20m Sim</h2>
+        <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:25px;">Visualisera tempot för att synka tekniken inför vändningarna.</p>
+        <div class="sim-controls">
+            <select id="sim-level" onchange="updateSimStats()">
+                <option value="1">Nivå 1 (Uppvärmning)</option>
+                <option value="5">Nivå 5</option>
+                <option value="8">Nivå 8 (Krav: 8:5)</option>
+                <option value="9">Nivå 9 (Godkänt-tempo)</option>
+                <option value="12">Nivå 12 (Ditt gamla tempo)</option>
+                <option value="15">Nivå 15 (Max)</option>
+            </select>
+            <div class="sim-stats"><span id="stat-speed">8.5 km/h</span><span id="stat-time">8.47s / vända</span></div>
+            <div class="track-container" id="track">
+                <div class="track-line line-start"></div><div class="track-line line-end"></div><div class="runner" id="runner"></div>
+            </div>
+            <button id="btn-sim-toggle" class="btn-sim" style="margin-top:30px;" onclick="toggleSimulator()">Starta Simulering</button>
+        </div>
+    </div>
+
+    <div id="stats-screen" class="screen">
+        <h2 style="margin-top:0; font-size:1.4rem; border-bottom:2px solid var(--primary); padding-bottom:10px; display:inline-block; text-transform:uppercase;">Progression & Kurvor</h2>
+        <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:25px;">Här ritas dina maxvikter upp automatiskt baserat på dina loggade gympass.</p>
+        
+        <div class="sim-controls" style="background: var(--surface); padding: 15px;">
+            <canvas id="progressionChart" style="max-height: 280px; width: 100%;"></canvas>
+        </div>
+
+        <h2 style="margin-top:20px; font-size:1.4rem; border-bottom:2px solid var(--primary); padding-bottom:10px; display:inline-block; text-transform:uppercase;">Backup & Molnsynk</h2>
+        <div class="sim-controls" style="text-align: left;">
+            <p style="font-size:0.85rem; color:var(--text-muted); margin:0 0 15px 0;">
+                Förberedd för Firebase/Supabase-backend. Just nu kan du göra en fullständig manuell krypterad backup av din data nedan.
+            </p>
+            <button class="btn-sim" onclick="generateBackupString()" style="background: var(--surface-light); color: var(--text-main); border: 1px solid var(--border); margin-bottom: 10px;">Generera Backup-sträng</button>
+            <textarea id="sync-box" class="sync-textarea" placeholder="Kopiera din kod härifrån för att spara, eller klistra in en gammal kod och tryck på Importera..."></textarea>
+            <button class="btn-sim" onclick="importBackupString()" style="margin-top:15px; width:100%;">Importera Backup</button>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-item active" onclick="switchTab('schema')">
+            <i class="fa-solid fa-clipboard-list"></i><span>Loggbok</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('beep')">
+            <i class="fa-solid fa-stopwatch"></i><span>Beep-Sim</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('stats-screen')">
+            <i class="fa-solid fa-chart-line"></i><span>Statistik</span>
+        </div>
+    </nav>
+
+    <div id="workout-player">
+        <div class="wp-top-bar">
+            <button onclick="closeWorkout()"><i class="fa-solid fa-arrow-left"></i></button>
+            <span class="title" id="wp-top-title">Övning 1 av X</span>
+            <button onclick="openExerciseList()"><i class="fa-solid fa-list"></i></button>
+        </div>
+        
+        <div class="ex-media-placeholder">
+            <i id="wp-icon" class="fa-solid fa-dumbbell"></i>
+        </div>
+        
+        <div class="ex-details">
+            <h2 id="ex-name">Knäböj</h2>
+            <p id="ex-target">Planerat: 5 set x 5 reps</p>
+            <div class="tactical-link" onclick="showExerciseInfo()">Se taktiskt utförande & video</div>
+        </div>
+
+        <div class="log-section">
+            <div class="history-section">
+                <div class="history-label" id="history-label-text">Förra passet</div>
+                <div class="pills-container" id="history-pills">
+                    </div>
+            </div>
+
+            <div id="current-set-ui">
+                <div style="text-align: center; margin-bottom: 15px; color: var(--primary); font-weight: 700; font-size: 1.1rem;" id="current-set-label">
+                    Logga Set 1
+                </div>
+
+                <div class="log-inputs">
+                    <div class="stepper-group">
+                        <span class="stepper-label">reps/sek</span>
+                        <div class="stepper">
+                            <button onclick="adjustValue('input-reps', -1)">-</button>
+                            <input type="text" id="input-reps" value="5" onchange="validateInput(this)">
+                            <button onclick="adjustValue('input-reps', 1)">+</button>
+                        </div>
+                    </div>
+                    
+                    <span class="multiply-sign">x</span>
+
+                    <div class="stepper-group">
+                        <span class="stepper-label">kg</span>
+                        <div class="stepper">
+                            <button onclick="adjustValue('input-kg', -2.5)">-</button>
+                            <input type="number" id="input-kg" value="0" step="0.5" onchange="validateInput(this)">
+                            <button onclick="adjustValue('input-kg', 2.5)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-log-set" id="btn-log-set" onclick="logCurrentSet()">Spara set & Nästa</button>
+            </div>
+            
+            <div class="history-section" style="margin-top: 15px;">
+                <div class="pills-container" id="today-pills"></div>
+            </div>
+
+            <button class="btn-next-ex" id="btn-next-ex" onclick="nextExercise()">Nästa övning</button>
+        </div>
+    </div>
+
+    <div id="ex-list-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="document.getElementById('ex-list-modal').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+            <h3 style="border-bottom: 2px solid var(--border); padding-bottom:10px; margin-top:0;">Översikt Pass</h3>
+            <div id="ex-list-container" style="margin-top: 20px;"></div>
+            <button class="btn-log-set" style="margin-top:20px; color: var(--danger); border-color: var(--danger);" onclick="finishWorkout()">Avsluta Pass Nu</button>
+        </div>
+    </div>
+
+    <div id="info-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="document.getElementById('info-modal').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="modal-title">Övning</h3>
+            <div class="muscle-focus-area">
+                <div class="muscle-icon" id="modal-icon"><i class="fa-solid fa-dumbbell"></i></div>
+                <div class="muscle-labels">
+                    <div class="muscle-label"><span class="dot primary"></span><span id="modal-primary">Primär: Ben</span></div>
+                    <div class="muscle-label"><span class="dot secondary"></span><span id="modal-secondary">Sekundär: Bål</span></div>
+                </div>
+            </div>
+            <p id="modal-desc" style="font-size:0.95rem; line-height:1.6; color:var(--text-muted); margin-bottom:20px;"></p>
+            <div style="background:var(--bg-color); padding:20px; border-radius:12px; border-left:4px solid var(--primary);">
+                <strong style="color:var(--primary); font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Taktiskt Utförande:</strong>
+                <p id="modal-focus" style="margin:8px 0 0; font-size:0.95rem; line-height:1.5; color:var(--text-main); font-weight:600;"></p>
+            </div>
+            <a id="modal-video-link" href="#" target="_blank" style="text-decoration: none; display: block; margin-top: 15px;">
+                <button class="btn-next-ex" style="background: var(--bg-color); color: var(--text-main); border: 1px solid var(--primary); display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <i class="fa-brands fa-youtube" style="color: #ef4444; font-size: 1.2rem;"></i> Se teknikvideo
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <div id="pass-info-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="document.getElementById('pass-info-modal').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+            <h3 id="pi-title" style="margin-top:0; color:var(--text-main); font-size:1.4rem; text-transform:uppercase; border-bottom:2px solid var(--border); padding-bottom:10px;">Pass Info</h3>
+            <p id="pi-subtitle" style="color:var(--primary); font-size:0.85rem; font-weight:700; text-transform:uppercase; margin-top:-5px; margin-bottom:15px;"></p>
+            <div id="pi-desc" style="font-size:0.95rem; line-height:1.6; color:var(--text-muted); background:var(--bg-color); padding:15px; border-radius:12px; border-left:4px solid var(--primary);"></div>
+        </div>
+    </div>
+
+    <div id="timer-overlay" class="timer-overlay">
+        <div id="timer-title" style="text-transform:uppercase; font-size:1rem; letter-spacing:2px; font-weight:700; opacity:0.8;">Vila</div>
+        <div id="timer-time" class="timer-time">00:00</div>
+        <button class="timer-skip" onclick="skipTimer()">Hoppa över <i class="fa-solid fa-forward-step" style="margin-left:5px;"></i></button>
+    </div>
+
+    <script>
+        function syncToCloud(data) { console.log("Förberedd för molnsynk."); }
+
+        // --- NEW EXERCISES ADDED ---
+        const exInfo = {
+            "Militärpress": { icon: "fa-arrow-up", primary: "Axlar (Deltoideus)", secondary: "Triceps & Bål", desc: "Lyft skivstången från bröstet. Pressa vertikalt tills armarna är utlåsta.", focus: "Spänn sätet och magen till 100%. Ryggraden ska vara rak. Ingen svank!", link: "https://www.youtube.com/results?search_query=Squat+University+strict+military+press+form" },
+            "Chins": { icon: "fa-arrow-down", primary: "Breda Ryggmuskeln", secondary: "Biceps & Underarmar", desc: "Häng med raka armar. Dra bröstkorgen mot stången. Återgå kontrollerat.", focus: "Använd 10kg väst vid fler än 10 reps. Kläm ihop skulderbladen.", link: "https://www.youtube.com/results?search_query=Squat+University+pull+up+mistakes" },
+            "Skivstångsrodd": { icon: "fa-arrow-left-long", primary: "Övre Rygg", secondary: "Biceps & Korsrygg", desc: "Fäll överkroppen. Dra stången tätt längs låren mot naveln.", focus: "Ryggen måste vara spikrak.", link: "https://www.youtube.com/results?search_query=how+to+barbell+row+alan+thrall" },
+            "Farmers Walk": { icon: "fa-person-walking", primary: "Underarmar (Grepp)", secondary: "Trapezius & Bål", desc: "Plocka upp tunga hantlar eller kettlebells. Gå en uppmätt sträcka (20m).", focus: "Axlarna bakåt och nedåt. Låt inte vikterna svänga. Korta, stabila steg.", link: "https://www.youtube.com/results?search_query=Brian+Alsruhe+farmers+walk+technique" },
+            "Bear Hug": { icon: "fa-hands-holding-circle", primary: "Bål (Kärna)", secondary: "Biceps & Bröst", desc: "Lyft upp en 35kg säck/boll. Krama den hårt mot bröstkorgen. Gå 20m.", focus: "Simulerar grepp kring person. Håll vikten högt på bröstet.", link: "https://www.youtube.com/results?search_query=sandbag+bear+hug+carry+strongman" },
+            "Hängande Knäuppdragningar": { icon: "fa-child-reaching", primary: "Bål (Raka magmuskler)", secondary: "Grepp & Höftböjare", desc: "Häng i en chinsstång. Dra upp knäna mot bröstet och sänk kontrollerat.", focus: "Undvik att svinga (kipping). Skapar brutal grepputhållighet och core-kontroll.", link: "https://www.youtube.com/results?search_query=hanging+knee+raises+strict+form" },
+            "Bröstryggsrotation": { icon: "fa-rotate", primary: "Bröstrygg (Thorakal)", secondary: "Axlar", desc: "Sitt på knä eller ligg på sidan (90/90). Rotera armen och överkroppen bakåt för att öppna bröstet.", focus: "Aktiv rörlighet för att motverka framåtroterade axlar från utrustning och pressövningar.", link: "https://www.youtube.com/results?search_query=thoracic+spine+mobility+exercises" },
+            "Knäböj": { icon: "fa-person-arrow-down-to-line", primary: "Framsida Lår (Quads)", secondary: "Säte & Baksida lår", desc: "Stång på nacken. Böj knäna tills höften passerar knäleden. Pressa upp.", focus: "Trycket ska ligga jämnt över hela foten. Överkroppen upprätt.", link: "https://www.youtube.com/results?search_query=Squat+University+how+to+squat+perfectly" },
+            "Marklyft": { icon: "fa-person-arrow-up-from-line", primary: "Baksida Lår & Säte", secondary: "Ryggsträckarna", desc: "Skenbenen mot stången. Spänn ryggen rak, sänk höften, och dra stången längs benen.", focus: "Startmotorn för docksläpet. Skapa maximal anspänning innan stången lämnar golvet.", link: "https://www.youtube.com/results?search_query=Alan+Thrall+how+to+deadlift" },
+            "Baklänges Släddrag": { icon: "fa-truck-fast", primary: "Framsida Lår (Quads)", secondary: "Grepp & Bål", desc: "Greppa handtagen fästa i släden. Luta dig bakåt och dra vikten baklänges.", focus: "DOCKSLÄP-TEKNIK: Armarna är spikraka statiska krokar! Böj dem ALDRIG. Sitt ner 45 grader och driv med korta steg.", link: "https://www.youtube.com/results?search_query=knees+over+toes+reverse+sled+pull" },
+            "Utfallsgång": { icon: "fa-shoe-prints", primary: "Säte (Gluteus)", secondary: "Quads & Balans", desc: "Kliv framåt. Sänk bakre knät precis ovanför golvet. Tryck ifrån och kliv fram med nästa fot.", focus: "Håll överkroppen vertikal.", link: "https://www.youtube.com/results?search_query=Squat+University+walking+lunges" },
+            "Suitcase Carry": { icon: "fa-suitcase", primary: "Bål (Sned magmuskulatur)", secondary: "Grepp & Säte", desc: "Farmers walk, men med vikt i bara ENA handen.", focus: "Anti-lateral flexion. Håll axlarna exakt jämna. Simulerar asymmetrisk utrustning (tjänstevapen/bälte).", link: "https://www.youtube.com/results?search_query=suitcase+carry+benefits+and+form" },
+            "Couch Stretch": { icon: "fa-person-praying", primary: "Höftböjare (Psoas)", secondary: "Framsida lår", desc: "Sätt bakre knät mot en vägg/bänk, foten pekande uppåt. Kliv fram med andra benet och skjut fram höften.", focus: "Kritisk rörlighet för att släppa spänningar i ländryggen efter tunga lyft och stillasittande i radiobil.", link: "https://www.youtube.com/results?search_query=Squat+university+couch+stretch" }
+        };
+
+        const phases = [
+            { weeks: [22,23,24,25,26,27], name: "Fas 1: Bas", p2: { s:3, r:"10", restS:90, restE:180, fw:"20", böjR:"10", markR:"8", sledW:"75", sledS:5 } },
+            { weeks: [28,29,30,31,32,33], name: "Fas 2: Max", p2: { s:5, r:"5", restS:180, restE:240, fw:"20", böjR:"5", markR:"3", sledW:"90", sledS:6 } },
+            { weeks: [34,35,36,37,38,39], name: "Fas 3: Peak", p2: { s:3, r:"3", restS:240, restE:300, fw:"20", böjR:"3", markR:"2", sledW:"100", sledS:4 } },
+            { weeks: [40], name: "Fas 4: Taper", p2: { s:2, r:"5", restS:120, restE:180, fw:"20", böjR:"5", markR:"3", sledW:"85", sledS:3 } }
+        ];
+
+        const schedule = [];
+        phases.forEach(phase => {
+            phase.weeks.forEach(w => {
+                let p1Detailed = w<28 ? "<strong>15/15 Intervaller:</strong><br>Spring 15 sek, vila 15 sek. Håll Nivå 9-tempo (ca 2.5 längder). Stanna direkt vid pipsignalen, vila, och starta där du står. Kör i 5 min. Vila 3 min. Kör 5 min till.<br><br><strong>Sprint 10x20m (80%):</strong><br>Spring med bra hållning och tryck, men inte max. Gå tillbaka som vila (ca 60s)." :
+                                 (w<34 ? "<strong>Beep-pyramid:</strong><br>Spring nivå 1 till 5, vila 2 min. Spring nivå 1 till 7, vila 2 min. Spring nivå 1 till 8. Extremt bra för att bygga vändningsteknik.<br><br><strong>Sprint 10x20m (100%):</strong><br>Max urladdning! Vila 2 minuter mellan loppen." :
+                                 (w<40 ? "<strong>Underhålls-Beep:</strong><br>Spring upp till nivå 9 eller 10 för att hålla rytmen vid liv. Mjölka inte ur dig. Vila 3 min.<br><br><strong>Sprint 10x20m (100%):</strong><br>Max urladdning! Vila 3 minuter (viktigt!) mellan loppen för nervsystemet." :
+                                         "<strong>Taper-Beep (Aktiv Vila):</strong><br>Känn bara på vändningarna upp till nivå 5. Max 3-4 korta, lätta 20m-sprintar på 70% för att hålla igång nervsystemet. Spara all energi till testet v.41!"));
+                
+                let p4Detailed = w<40 ? "<strong>Alt A (Distans):</strong><br>45-60 min Powerwalk eller lätt jogg i kuperad terräng med 10kg väst för att vänja lederna.<br><br><strong>Alt B (EMOM 20 min - 10kg väst):</strong><br>Varje minut börjar du en ny övning. Vilan är den tid som blir över.<br><br>• <strong>Min 1:</strong> 15 Knäböj<br>• <strong>Min 2:</strong> 10 Armhävningar (bröstet i golvet)<br>• <strong>Min 3:</strong> 15 Utfallssteg<br>• <strong>Min 4:</strong> 10 Mage/Rygg-burpees (Handsläpp på mage, skuldror i golv på rygg)<br>• <em>Upprepa 5 varv!</em>" : 
+                                        "<strong>Aktiv vila:</strong><br>Gå en lugn promenad på 30-40 minuter utan viktväst. Stretcha ordentligt. Ladda batterierna inför v.41.";
+
+                let pass1Desc = w<28 ? "15/15 + 80% Sprint" : (w<34 ? "Pyramid + 100% Sprint" : (w<40 ? "Underhåll + 100% Sprint" : "Lätt rörlighet & Sprint"));
+                let pass4Desc = w<40 ? "Aktiv Vila" : "Viktväst 10kg";
+
+                schedule.push({
+                    week: w, phaseName: phase.name,
+                    passes: [
+                        { id: 1, name: "P1: Beep & Sprint", desc: pass1Desc, isGym: false, detailed: p1Detailed },
+                        { id: 2, name: "P2: Överkropp & Bål", desc: `${phase.p2.s}x${phase.p2.r} | + Core & Rörlighet`, isGym: true, setup: phase.p2 },
+                        { id: 3, name: "P3: Ben & Släde", desc: `Släddrag: ${phase.p2.sledW}kg | + Core`, isGym: true, setup: phase.p2 },
+                        { id: 4, name: "P4: Taktisk Tålighet", desc: pass4Desc, isGym: false, detailed: p4Detailed }
+                    ]
+                });
+            });
+        });
+
+        let appData = JSON.parse(localStorage.getItem('polisfysDataV11')) || {};
+        if (!appData.logs) appData.logs = {};
+        function saveData() { localStorage.setItem('polisfysDataV11', JSON.stringify(appData)); syncToCloud(appData); }
+
+        function renderSchema() {
+            const container = document.getElementById('weeks-container');
+            container.innerHTML = '';
+            schedule.forEach(weekData => {
+                const wId = `w${weekData.week}`;
+                if (!appData[wId]) appData[wId] = { p1:false, p2:false, p3:false, p4:false };
+
+                let passesHtml = weekData.passes.map(p => {
+                    const isChecked = appData[wId][`p${p.id}`];
+                    let btnHtml = p.isGym && !isChecked ? `<button class="start-btn" onclick="startWorkout(${weekData.week}, ${p.id}); event.stopPropagation();">KÖR</button>` : (!p.isGym ? `<button class="start-btn info-btn-pass" onclick="showPassInfo(${weekData.week}, ${p.id}); event.stopPropagation();"><i class="fa-solid fa-list-ul"></i></button>` : '');
+                    
+                    return `
+                        <div class="pass-row" onclick="togglePass(${weekData.week}, ${p.id})">
+                            <div class="pass-info"><div class="checkbox ${isChecked ? 'checked' : ''}"><i class="fa-solid fa-check" style="display:${isChecked?'block':'none'}"></i></div>
+                            <div class="pass-details"><h4>${p.name}</h4><p>${p.desc}</p></div></div>
+                            ${btnHtml}
+                        </div>`;
+                }).join('');
+                container.innerHTML += `<div class="week-card"><div class="week-header"><span>VECKA ${weekData.week}</span><span class="phase-badge">${weekData.phaseName}</span></div>${passesHtml}</div>`;
+            });
+        }
+
+        function togglePass(week, passId) { appData[`w${week}`][`p${passId}`] = !appData[`w${week}`][`p${passId}`]; saveData(); renderSchema(); updateChart(); }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            if(tabId === 'stats-screen') updateChart();
+        }
+
+        /* WORKOUT PLAYER LOGIC */
+        let currentWorkout = null; let currentExIndex = 0; let timerInterval = null;
+
+        function startWorkout(week, passId) {
+            const weekData = schedule.find(w => w.week === week);
+            const setup = weekData.passes.find(p => p.id === passId).setup;
+            let exercises = [];
+            
+            // UPDATED EXERCISE LISTS WITH CORE AND MOBILITY
+            if(passId === 2) {
+                exercises = [
+                    { name: "Militärpress", sets: setup.s, reps: setup.r, restS: setup.restS },
+                    { name: "Chins", sets: setup.s, reps: "Max", restS: setup.restS },
+                    { name: "Skivstångsrodd", sets: setup.s, reps: setup.r, restS: setup.restS },
+                    { name: "Farmers Walk", sets: 1, reps: setup.fw, restS: 60 },
+                    { name: "Bear Hug", sets: 1, reps: setup.fw, restS: 60 },
+                    { name: "Hängande Knäuppdragningar", sets: 3, reps: "15", restS: 60 },
+                    { name: "Bröstryggsrotation", sets: 2, reps: "60s", restS: 0 }
+                ];
+            } else {
+                exercises = [
+                    { name: "Knäböj", sets: setup.s, reps: setup.böjR, restS: setup.restS },
+                    { name: "Marklyft", sets: setup.s, reps: setup.markR, restS: setup.restS + 60 },
+                    { name: "Baklänges Släddrag", sets: setup.sledS, reps: setup.fw, restS: setup.restS },
+                    { name: "Utfallsgång", sets: 1, reps: setup.fw, restS: 90 },
+                    { name: "Suitcase Carry", sets: 2, reps: "20m", restS: 60 },
+                    { name: "Couch Stretch", sets: 2, reps: "60s", restS: 0 }
+                ];
+            }
+
+            currentWorkout = { week, passId, exercises, wId: `w${week}_p${passId}` };
+            if(!appData.logs) appData.logs = {};
+            if(!appData.logs[currentWorkout.wId]) appData.logs[currentWorkout.wId] = {};
+            
+            currentExIndex = 0;
+            document.getElementById('workout-player').style.display = 'flex';
+            renderExercise();
+        }
+
+        function getLatestExerciseSets(exName) {
+            let latestSets = [];
+            let maxWeek = -1;
+            for (const wId in appData.logs) {
+                const match = wId.match(/^w(\d+)_p\d+$/);
+                if (match) {
+                    const weekNum = parseInt(match[1]);
+                    if (weekNum > maxWeek && weekNum < (currentWorkout ? currentWorkout.week : 999)) {
+                        let sets = [];
+                        let found = false;
+                        for(let s=1; s<=6; s++) {
+                            const log = appData.logs[wId][`${exName}_s${s}`];
+                            if(log && (log.kg || log.reps)) {
+                                sets.push(`${log.reps||0} x ${log.kg||0} kg`);
+                                found = true;
+                            }
+                        }
+                        if(found) { maxWeek = weekNum; latestSets = sets; }
+                    }
+                }
+            }
+            return latestSets;
+        }
+
+        function getTodaySets(exName, totalSets) {
+            let sets = [];
+            for(let s=1; s<=totalSets; s++) {
+                const isDone = appData.logs[currentWorkout.wId][`${exName}_s${s}_done`];
+                if(isDone) {
+                    const log = appData.logs[currentWorkout.wId][`${exName}_s${s}`];
+                    sets.push(`<span class="pill active"><i class="fa-solid fa-check" style="margin-right:4px;"></i> ${log.reps} x ${log.kg} kg</span>`);
+                }
+            }
+            return sets;
+        }
+
+        function getNextSetIndex(exName, totalSets) {
+            for(let s=1; s<=totalSets; s++) {
+                if(!appData.logs[currentWorkout.wId][`${exName}_s${s}_done`]) return s;
+            }
+            return totalSets + 1;
+        }
+
+        function renderExercise() {
+            const ex = currentWorkout.exercises[currentExIndex];
+            
+            document.getElementById('wp-top-title').innerText = `Övning ${currentExIndex + 1} av ${currentWorkout.exercises.length}`;
+            document.getElementById('wp-icon').className = `fa-solid ${exInfo[ex.name].icon}`;
+            document.getElementById('ex-name').innerText = ex.name;
+            document.getElementById('ex-target').innerText = `Planerat: ${ex.sets} set x ${ex.reps}`;
+
+            // History Pills
+            const history = getLatestExerciseSets(ex.name);
+            const historyContainer = document.getElementById('history-pills');
+            if(history.length > 0) {
+                document.getElementById('history-label-text').innerText = "Förra passet";
+                historyContainer.innerHTML = history.map(h => `<span class="pill">${h}</span>`).join('');
+            } else {
+                document.getElementById('history-label-text').innerText = "Ingen tidigare historik";
+                historyContainer.innerHTML = '';
+            }
+
+            // Current Session / Today Pills
+            const todayHtml = getTodaySets(ex.name, ex.sets).join('');
+            document.getElementById('today-pills').innerHTML = todayHtml;
+
+            // Set UI Logic
+            const nextSet = getNextSetIndex(ex.name, ex.sets);
+            const uiContainer = document.getElementById('current-set-ui');
+            
+            if (nextSet <= ex.sets) {
+                uiContainer.style.display = 'block';
+                document.getElementById('current-set-label').innerText = `Logga Set ${nextSet}`;
+                
+                // Flexible pre-fill for numeric or string ("60s") reps
+                let defReps = ex.reps;
+                let defKg = 0;
+                
+                if (nextSet > 1) {
+                    const prevLog = appData.logs[currentWorkout.wId][`${ex.name}_s${nextSet-1}`];
+                    if (prevLog) { defReps = prevLog.reps; defKg = prevLog.kg; }
+                } else if (history.length > 0) {
+                    const parts = history[0].split('x');
+                    if(parts.length == 2) {
+                        defReps = parts[0].trim();
+                        defKg = parseFloat(parts[1].replace('kg','').trim());
+                    }
+                }
+                
+                // Allow "60s" or "Max" to show up without breaking stepper
+                document.getElementById('input-reps').value = defReps;
+                document.getElementById('input-kg').value = defKg;
+                
+            } else {
+                uiContainer.style.display = 'none'; // All sets done
+            }
+            
+            // Next button logic
+            const isLastEx = (currentExIndex === currentWorkout.exercises.length - 1);
+            const nextBtn = document.getElementById('btn-next-ex');
+            
+            if (isLastEx) {
+                nextBtn.innerText = "AVSLUTA PASS";
+                nextBtn.style.background = "var(--danger)";
+                nextBtn.onclick = finishWorkout;
+            } else {
+                nextBtn.innerText = "NÄSTA ÖVNING";
+                nextBtn.style.background = "var(--surface-light)";
+                nextBtn.onclick = nextExercise;
+            }
+        }
+
+        // Modified adjustValue to handle strings gracefully
+        function adjustValue(id, delta) {
+            const el = document.getElementById(id);
+            let val = parseFloat(el.value);
+            if (isNaN(val)) return; // Don't try to math "60s" or "Max" via buttons
+            val += delta;
+            if (val < 0) val = 0;
+            el.value = (id === 'input-kg') ? val.toFixed(1).replace('.0','') : Math.round(val);
+        }
+
+        function validateInput(el) { 
+            // Allow string values if not a number
+            if (el.value === "") el.value = 0; 
+        }
+
+        function logCurrentSet() {
+            const ex = currentWorkout.exercises[currentExIndex];
+            const nextSet = getNextSetIndex(ex.name, ex.sets);
+            
+            if (nextSet <= ex.sets) {
+                const reps = document.getElementById('input-reps').value;
+                const kg = document.getElementById('input-kg').value;
+                
+                const logKey = `${ex.name}_s${nextSet}`;
+                appData.logs[currentWorkout.wId][logKey] = { kg: kg, reps: reps };
+                appData.logs[currentWorkout.wId][`${logKey}_done`] = true;
+                saveData(); 
+                
+                renderExercise();
+                
+                if (nextSet < ex.sets) {
+                    if(ex.restS > 0) startTimer(ex.restS);
+                } else {
+                    if(!isLastEx) startTimer(180, "ALLA SET KLARA! VILA TILL NÄSTA ÖVNING");
+                }
+            }
+        }
+        function get isLastEx() { return currentExIndex === currentWorkout.exercises.length - 1; }
+
+        function nextExercise() { if(currentExIndex < currentWorkout.exercises.length - 1) { currentExIndex++; renderExercise(); skipTimer(); } }
+        function finishWorkout() { appData[`w${currentWorkout.week}`][`p${currentWorkout.passId}`] = true; saveData(); renderSchema(); closeWorkout(); document.getElementById('ex-list-modal').style.display='none'; }
+        function closeWorkout() { document.getElementById('workout-player').style.display = 'none'; currentWorkout = null; skipTimer(); }
+
+        function openExerciseList() {
+            const container = document.getElementById('ex-list-container');
+            container.innerHTML = '';
+            currentWorkout.exercises.forEach((ex, idx) => {
+                let completedSets = 0;
+                for(let i=1; i<=ex.sets; i++) { if(appData.logs[currentWorkout.wId][`${ex.name}_s${i}_done`]) completedSets++; }
+                const isActive = (idx === currentExIndex);
+                container.innerHTML += `
+                    <div class="ex-list-item ${isActive ? 'active' : ''}" onclick="currentExIndex=${idx}; document.getElementById('ex-list-modal').style.display='none'; renderExercise(); skipTimer();">
+                        <div>
+                            <div class="ex-list-name">${ex.name}</div>
+                            <div class="ex-list-status">${completedSets} av ${ex.sets} set klara</div>
+                        </div>
+                        <div class="ex-list-icon">${completedSets === ex.sets ? '<i class="fa-solid fa-check-circle" style="color:var(--secondary)"></i>' : '<i class="fa-solid fa-chevron-right"></i>'}</div>
+                    </div>`;
+            });
+            document.getElementById('ex-list-modal').style.display = 'flex';
+        }
+
+        function showExerciseInfo() {
+            const exName = currentWorkout.exercises[currentExIndex].name;
+            const info = exInfo[exName];
+            if(info) {
+                document.getElementById('modal-title').innerText = exName;
+                document.getElementById('modal-icon').innerHTML = `<i class="fa-solid ${info.icon}"></i>`;
+                document.getElementById('modal-primary').innerText = `PRIMÄR: ${info.primary}`;
+                document.getElementById('modal-secondary').innerText = `SEKUNDÄR: ${info.secondary}`;
+                document.getElementById('modal-desc').innerText = info.desc;
+                document.getElementById('modal-focus').innerText = info.focus;
+                const linkBtn = document.getElementById('modal-video-link');
+                if(info.link) { linkBtn.href = info.link; linkBtn.style.display = 'block'; } else { linkBtn.style.display = 'none'; }
+                document.getElementById('info-modal').style.display = 'flex';
+            }
+        }
+
+        function showPassInfo(week, passId) {
+            const weekData = schedule.find(w => w.week === week);
+            const passData = weekData.passes.find(p => p.id === passId);
+            document.getElementById('pi-title').innerText = passData.name;
+            document.getElementById('pi-subtitle').innerText = `VECKA ${week} | ${weekData.phaseName}`;
+            document.getElementById('pi-desc').innerHTML = passData.detailed;
+            document.getElementById('pass-info-modal').style.display = 'flex';
+        }
+
+        /* TIMER LOGIC */
+        function startTimer(seconds, title="Vila till nästa set") {
+            clearInterval(timerInterval); document.getElementById('timer-title').innerText = title;
+            document.getElementById('timer-overlay').classList.add('active');
+            let timeLeft = seconds; updateTimerDisplay(timeLeft);
+            timerInterval = setInterval(() => {
+                timeLeft--; updateTimerDisplay(timeLeft);
+                if(timeLeft <= 0) { skipTimer(); try { navigator.vibrate([300, 100, 300, 100, 300]); } catch(e){} }
+            }, 1000);
+        }
+        function updateTimerDisplay(sec) { document.getElementById('timer-time').innerText = `${Math.floor(sec/60).toString().padStart(2,'0')}:${(sec%60).toString().padStart(2,'0')}`; }
+        function skipTimer() { clearInterval(timerInterval); document.getElementById('timer-overlay').classList.remove('active'); }
+
+        /* BEEP SIMULATOR & CHARTS */
+        function updateChart() {
+            const weeks = [22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40];
+            const labels = weeks.map(w => `V.${w}`);
+            const getMax = (w, p, ex) => {
+                let mw = 0; const wId = `w${w}_p${p}`;
+                if(appData.logs && appData.logs[wId]) {
+                    for(let s=1; s<=6; s++) { const l = appData.logs[wId][`${ex}_s${s}`]; if(l&&l.kg){ const w=parseFloat(l.kg); if(w>mw) mw=w; } }
+                }
+                return mw>0?mw:null;
+            };
+            const ctx = document.getElementById('progressionChart').getContext('2d');
+            if(window.activeChart) window.activeChart.destroy();
+            window.activeChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels, datasets: [
+                    { label: 'Marklyft', data: weeks.map(w=>getMax(w,3,"Marklyft")), borderColor: '#ef4444', tension: 0.2, spanGaps: true },
+                    { label: 'Knäböj', data: weeks.map(w=>getMax(w,3,"Knäböj")), borderColor: '#3b82f6', tension: 0.2, spanGaps: true },
+                    { label: 'Militärpress', data: weeks.map(w=>getMax(w,2,"Militärpress")), borderColor: '#f59e0b', tension: 0.2, spanGaps: true }
+                ]},
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { color: '#2a3b5c' }, ticks: { color: '#94a3b8' } }, y: { grid: { color: '#2a3b5c' }, ticks: { color: '#94a3b8' } } }, plugins: { legend: { labels: { color: '#f8fafc' } } } }
+            });
+        }
+
+        function updateSimStats() {
+            const lvl = parseInt(document.getElementById('sim-level').value);
+            const kmh = 8.5 + (lvl - 1) * 0.5; const s = 20 / (kmh / 3.6);
+            document.getElementById('stat-speed').innerText = `${kmh.toFixed(1)} km/h`;
+            document.getElementById('stat-time').innerText = `${s.toFixed(2)}s / vända`;
+            return s;
+        }
+        function toggleSimulator() {
+            const btn = document.getElementById('btn-sim-toggle'); const runner = document.getElementById('runner'); const track = document.getElementById('track');
+            if(isRunning) { clearInterval(simInterval); runner.style.transition = 'none'; runner.style.left = '10%'; btn.innerText = "STARTA SIMULERING"; btn.classList.remove('stop'); isRunning = false;
+            } else {
+                const s = updateSimStats(); btn.innerText = "STOPPA SIMULERING"; btn.classList.add('stop'); isRunning = true;
+                let goRight = true; runner.style.transition = `left ${s}s linear`; setTimeout(() => { runner.style.left = 'calc(90% - 24px)'; }, 50);
+                simInterval = setInterval(() => { track.classList.add('flash'); setTimeout(() => track.classList.remove('flash'), 150); try{navigator.vibrate(150);}catch(e){} goRight = !goRight; runner.style.left = goRight ? 'calc(90% - 24px)' : '10%'; }, s * 1000);
+            }
+        }
+
+        /* BACKUP HANDLERS */
+        function generateBackupString() {
+            const str = btoa(unescape(encodeURIComponent(JSON.stringify(appData))));
+            document.getElementById('sync-box').value = str;
+        }
+        function importBackupString() {
+            const str = document.getElementById('sync-box').value.trim();
+            if(!str) return alert("Klistra in en backup-sträng först.");
+            try {
+                const parsed = JSON.parse(decodeURIComponent(escape(atob(str))));
+                if(confirm("Vill du skriva över din nuvarande logg med denna backup?")) {
+                    appData = parsed; saveData(); renderSchema(); alert("Importen lyckades!");
+                }
+            } catch(e) { alert("Felaktig backup-kod."); }
+        }
+
+        renderSchema(); updateSimStats();
+    </script>
+</body>
+</html>
