@@ -3,79 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1320">
     <link rel="apple-touch-icon" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/solid/crosshairs.svg">
-    <title>Polisfys Taktisk V17</title>
+    
+    <title>Polisfys Taktisk V18</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* TACTICAL DARK THEME */
+        /* TACTICAL DARK THEME WITH DYNAMIC VARS */
         :root {
             --bg-color: #0b1320; 
             --surface: #152238; 
             --surface-light: #1e2f4d;
-            --primary: #3b82f6; 
+            --primary: #3b82f6; /* Standard Blue, dynamically changes */
             --secondary: #10b981; 
             --danger: #ef4444;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
             --border: #2a3b5c;
             --track-green: #143324;
-            --muscle-primary: #ef4444; 
-            --muscle-secondary: #f59e0b; 
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 75px; overscroll-behavior-y: contain;}
         
-        header { background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 15px 20px; text-align: center; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 75px; overscroll-behavior-y: contain; }
+        
+        /* Header & Nav */
+        header { background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 15px 20px; text-align: center; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: background-color 0.3s;}
         header h1 { margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-main);}
-        header i { color: var(--primary); }
+        header i { color: var(--primary); transition: color 0.3s;}
         
         nav { position: fixed; bottom: 0; width: 100%; background: var(--surface); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--border); z-index: 100; padding-bottom: calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 15px rgba(0,0,0,0.3);}
         .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); text-decoration: none; font-size: 0.72rem; width: 25%; cursor: pointer; transition: 0.2s;}
         .nav-item.active { color: var(--primary); font-weight: 700; }
         .nav-item i { font-size: 1.3rem; margin-bottom: 5px; }
         
+        /* Screens */
         .screen { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Dashboard & Cards */
+        .dashboard-card { background: linear-gradient(135deg, var(--surface) 0%, var(--surface-light) 100%); border-left: 4px solid var(--primary); padding: 20px !important; margin-bottom: 25px !important;}
+        .progress-bar-bg { width: 100%; background: rgba(0,0,0,0.4); height: 10px; border-radius: 5px; margin-top: 12px; overflow: hidden; border: 1px solid var(--border);}
+        .progress-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.5s ease-out; box-shadow: 0 0 10px var(--primary);}
+
         .week-card { background: var(--surface); border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.2);}
         .week-header { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 12px; font-size: 1.1rem; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 10px;}
-        .phase-badge { font-size: 0.75rem; background: rgba(59, 130, 246, 0.2); color: var(--primary); padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .phase-badge { font-size: 0.75rem; background: rgba(255,255,255,0.1); color: var(--primary); padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 800;}
+        
         .pass-row { display: flex; align-items: center; justify-content: space-between; padding: 15px 0; border-bottom: 1px dashed var(--border); }
         .pass-row:last-child { border-bottom: none; padding-bottom: 0;}
         .pass-row:first-of-type { padding-top: 0;}
         .pass-info { display: flex; align-items: center; flex: 1; cursor: pointer; }
-        .checkbox { width: 26px; height: 26px; border: 2px solid var(--border); border-radius: 6px; margin-right: 15px; display: flex; align-items: center; justify-content: center; background: var(--bg-color);}
+        .checkbox { width: 26px; height: 26px; border: 2px solid var(--border); border-radius: 6px; margin-right: 15px; display: flex; align-items: center; justify-content: center; background: var(--bg-color); transition: 0.2s;}
         .checkbox.checked { background: var(--secondary); border-color: var(--secondary); color: var(--bg-color); }
         .pass-details h4 { margin: 0; font-size: 1rem; color: var(--text-main);}
         .pass-details p { margin: 4px 0 0; font-size: 0.8rem; color: var(--text-muted); }
         
-        .start-btn { background: var(--primary); color: var(--text-main); border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; text-transform: uppercase;}
-        .info-btn-pass { background: var(--surface-light); color: var(--primary); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; display: flex; align-items: center; gap: 5px; }
+        /* Buttons */
+        .start-btn { background: var(--primary); color: var(--text-main); border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; transition: 0.3s;}
+        .info-btn-pass { background: var(--surface-light); color: var(--primary); border: 1px solid var(--border); }
 
-        /* Workout Player (Friskis GO Style) */
+        /* Workout Player */
         #workout-player { background: var(--bg-color); min-height: 100vh; position: fixed; top: 0; left: 0; width: 100%; z-index: 200; overflow-y: auto; display: none; flex-direction: column; }
         .wp-top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10;}
         .wp-top-bar button { background: none; border: none; color: var(--text-main); font-size: 1.2rem; cursor: pointer;}
         .wp-top-bar .title { font-weight: 600; font-size: 1.1rem; }
 
-        .ex-media-placeholder { background: linear-gradient(135deg, #1e2f4d 0%, #0b1320 100%); height: 180px; display: flex; justify-content: center; align-items: center; font-size: 4rem; color: rgba(255,255,255,0.1); border-bottom: 1px solid var(--border);}
+        .ex-media-placeholder { background: linear-gradient(135deg, var(--surface) 0%, var(--bg-color) 100%); height: 180px; display: flex; justify-content: center; align-items: center; font-size: 4rem; color: var(--primary); opacity: 0.8; border-bottom: 1px solid var(--border); transition: 0.3s;}
         .ex-details { padding: 20px; text-align: center;}
         .ex-details h2 { margin: 0 0 5px 0; font-size: 1.5rem; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; }
         .ex-details p { margin: 0 0 10px 0; color: var(--primary); font-weight: 600; font-size: 0.9rem; }
-        .tactical-link { color: var(--danger); font-size: 0.8rem; text-decoration: underline; cursor: pointer; }
+        .tactical-link { color: var(--text-muted); font-size: 0.8rem; text-decoration: underline; cursor: pointer; display: inline-block; padding: 5px; }
 
+        /* Log Section */
         .log-section { padding: 20px; background: var(--surface); border-top-left-radius: 20px; border-top-right-radius: 20px; flex: 1; box-shadow: 0 -10px 20px rgba(0,0,0,0.2);}
         .history-section { margin-bottom: 20px; text-align: center; }
         .history-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;}
         .pills-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
         .pill { background: var(--bg-color); color: var(--text-muted); padding: 6px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border); }
         .pill.active { background: var(--secondary); color: var(--bg-color); border-color: var(--secondary); }
+        .pill .orm { font-size: 0.7rem; opacity: 0.7; margin-left: 4px; font-weight: 400; }
 
         .log-inputs { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px;}
         .stepper-group { display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 130px;}
@@ -84,14 +96,27 @@
         .stepper button { background: var(--surface-light); border: none; color: var(--text-main); width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; cursor: pointer;}
         .stepper input { background: none; border: none; color: var(--text-main); font-size: 1.1rem; font-weight: 700; width: 50px; text-align: center; }
         
-        .btn-log-set { background: var(--danger); color: white; border: none; width: 100%; padding: 16px; border-radius: 12px; font-weight: 800; font-size: 1rem; cursor: pointer; text-transform: uppercase; margin-bottom: 10px;}
+        .btn-log-set { background: var(--primary); color: white; border: none; width: 100%; padding: 16px; border-radius: 12px; font-weight: 800; font-size: 1rem; cursor: pointer; text-transform: uppercase; margin-bottom: 10px; transition: 0.3s;}
         .btn-next-ex { background: var(--surface-light); color: var(--text-main); border: 1px solid var(--border); width: 100%; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; text-transform: uppercase;}
 
-        /* Timer */
-        .timer-overlay { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--primary); color: white; padding: 40px 20px; border-top-left-radius: 24px; border-top-right-radius: 24px; transform: translateY(100%); transition: transform 0.3s; z-index: 400; text-align: center;}
+        /* Circular Timer */
+        .timer-overlay { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--surface); color: white; padding: 40px 20px; border-top-left-radius: 24px; border-top-right-radius: 24px; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 400; text-align: center; box-shadow: 0 -10px 40px rgba(0,0,0,0.5);}
         .timer-overlay.active { transform: translateY(0); }
-        .timer-time { font-size: 5rem; font-weight: 800; margin: 10px 0; font-variant-numeric: tabular-nums;}
-        .timer-skip { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 20px; border-radius: 20px; text-transform: uppercase; font-size: 0.8rem;}
+        
+        .timer-circle-wrap { position: relative; width: 160px; height: 160px; margin: 15px auto; }
+        .timer-circle-wrap svg { transform: rotate(-90deg); width: 160px; height: 160px; }
+        .timer-circle-bg { fill: none; stroke: var(--bg-color); stroke-width: 12; }
+        .timer-circle-progress { fill: none; stroke: var(--primary); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 1s linear; stroke-dasharray: 440; stroke-dashoffset: 0; }
+        .timer-time { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+        
+        .timer-skip { background: var(--surface-light); border: 1px solid var(--border); color: white; padding: 12px 25px; border-radius: 30px; text-transform: uppercase; font-size: 0.8rem; font-weight: 700; margin-top: 15px;}
+
+        /* Mission Accomplished */
+        #success-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--secondary); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; color: var(--bg-color); text-align: center;}
+        #success-overlay i { font-size: 6rem; margin-bottom: 20px; animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #success-overlay h2 { font-size: 2rem; text-transform: uppercase; letter-spacing: 2px; margin: 0; animation: slideUp 0.5s ease; }
+        @keyframes scaleIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes slideUp { 0% { transform: translateY(20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 
         /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 300; display: none; justify-content: center; align-items: flex-end;}
@@ -101,18 +126,11 @@
         .muscle-focus-area { display: flex; gap: 12px; margin: 15px 0; background: var(--bg-color); padding: 12px; border-radius: 10px; border: 1px solid var(--border);}
         .muscle-icon { width: 50px; height: 50px; background: var(--surface-light); border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: var(--primary);}
         .muscle-label { font-size: 0.8rem; margin-bottom: 3px; display: flex; align-items: center; gap: 6px;}
-        .dot { width: 8px; height: 8px; border-radius: 50%; }
-        .dot.primary { background: var(--muscle-primary); }
-        .dot.secondary { background: var(--muscle-secondary); }
 
         /* Simulator */
         .track-container { width: 100%; height: 100px; background: var(--track-green); border-radius: 8px; position: relative; overflow: hidden; border: 2px solid #0f2418; margin: 15px 0;}
         .runner { position: absolute; width: 20px; height: 20px; background: var(--primary); border-radius: 50%; top: 50%; transform: translateY(-50%); left: 10%; transition: left linear; border: 2px solid white;}
         .track-line { position: absolute; top: 0; bottom: 0; width: 3px; background: rgba(255,255,255,0.5); }
-        
-        .btn-sim { padding: 16px; background: var(--secondary); color: var(--bg-color); border: none; border-radius: 12px; font-weight: 800; width: 100%; cursor: pointer; text-transform: uppercase; font-size: 1.05rem;}
-        .btn-sim.stop { background: var(--danger); color: white;}
-        
         .flash { animation: flashScreen 0.3s ease; }
         @keyframes flashScreen { 0% { background-color: rgba(255,255,255,0.2); } 100% { background-color: var(--track-green); } }
 
@@ -122,12 +140,30 @@
 <body>
 
     <header>
-        <h1>Polisfys HT25 - V17</h1>
+        <h1>Polisfys HT26 - V18</h1>
         <i class="fa-solid fa-crosshairs"></i>
     </header>
 
+    <div id="success-overlay">
+        <i class="fa-solid fa-circle-check"></i>
+        <h2>Bra jobbat!</h2>
+    </div>
+
     <div id="schema" class="screen active">
-        <h2 style="margin-top:0; font-size:1.3rem; border-bottom:2px solid var(--primary); padding-bottom:8px; display:inline-block; text-transform:uppercase;">Träningsschema v.22 - v.40</h2>
+        
+        <div class="week-card dashboard-card">
+            <div style="font-size:0.8rem; color:var(--text-main); opacity:0.8; font-weight:600; text-transform:uppercase; display:flex; justify-content:space-between;">
+                <span>Mål: Fystest V.41</span>
+                <i class="fa-solid fa-stopwatch"></i>
+            </div>
+            <div id="dash-countdown" style="font-size:2.2rem; font-weight:800; color:var(--primary); margin:5px 0; letter-spacing:-1px;">-- Veckor</div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="dash-progress"></div>
+            </div>
+            <div style="font-size:0.75rem; text-align:right; margin-top:8px; color:var(--text-muted); font-weight:600;" id="dash-progress-text">--% Genomfört</div>
+        </div>
+
+        <h2 style="margin-top:0; font-size:1.1rem; color:var(--text-muted); padding-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Träningsschema</h2>
         <div id="weeks-container"></div>
     </div>
 
@@ -144,20 +180,23 @@
                 <option value="15">Nivå 15 (Max)</option>
             </select>
             <div id="sim-stats" style="font-weight:700; color:var(--primary); margin-bottom:10px;">8.5 km/h | 8.47s / vända</div>
-            <div class="track-container" id="track">
-                <div class="track-line" style="left:10%"></div>
-                <div class="track-line" style="right:10%"></div>
-                <div class="runner" id="runner"></div>
-            </div>
+            <div class="track-container" id="track"><div class="track-line" style="left:10%"></div><div class="track-line" style="right:10%"></div><div class="runner" id="runner"></div></div>
             <button class="start-btn" id="btn-sim-toggle" style="width:100%; padding:15px;" onclick="toggleSimulator()">Starta Simulering</button>
         </div>
     </div>
 
     <div id="stats" class="screen">
-        <h2 style="text-transform:uppercase; font-size:1.3rem; border-bottom:2px solid var(--primary); padding-bottom:8px; display:inline-block;">Progression</h2>
+        <h2 style="text-transform:uppercase; font-size:1.3rem; border-bottom:2px solid var(--primary); padding-bottom:8px; display:inline-block;">Progression & Export</h2>
         <div class="week-card" style="background:var(--surface); height:300px;"><canvas id="progressionChart"></canvas></div>
+        
         <div class="week-card">
-            <h4 style="margin-top:0;">Data Backup</h4>
+            <h4 style="margin-top:0; margin-bottom:5px;">Exportera till Excel</h4>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Ladda ner all din historik, vikter och 1RM som en CSV-fil för Excel.</p>
+            <button class="start-btn" style="width:100%; background:var(--secondary); color:var(--bg-color);" onclick="exportCSV()"><i class="fa-solid fa-file-csv" style="margin-right:8px;"></i> Ladda ner CSV</button>
+        </div>
+
+        <div class="week-card">
+            <h4 style="margin-top:0;">Data Backup / Importera</h4>
             <button class="btn-next-ex" style="font-size:0.8rem; margin-bottom:10px;" onclick="exportData()">Generera Backup-kod</button>
             <textarea id="data-box" style="width:100%; height:60px; background:var(--bg-color); color:var(--text-muted); border:1px solid var(--border); border-radius:8px; font-size:0.7rem; padding:8px;"></textarea>
             <button class="btn-log-set" style="margin-top:10px; font-size:0.8rem; padding:10px;" onclick="importBackupString()">Importera Backup</button>
@@ -176,7 +215,7 @@
             <span class="title" id="wp-top-title">Övning 1 av X</span>
             <button onclick="openExerciseList()"><i class="fa-solid fa-bars-staggered"></i></button>
         </div>
-        <div class="ex-media-placeholder"><i id="wp-icon" class="fa-solid fa-dumbbell"></i></div>
+        <div class="ex-media-placeholder" id="ex-media-bg"><i id="wp-icon" class="fa-solid fa-dumbbell"></i></div>
         <div class="ex-details">
             <h2 id="ex-name-display">KNÄBÖJ</h2>
             <p id="ex-target-display">PLANERAT: 5 SET x 5 REPS</p>
@@ -188,7 +227,7 @@
                 <div class="pills-container" id="hist-pills"></div>
             </div>
             <div id="current-set-ui">
-                <div id="current-set-label" style="text-align:center; font-weight:800; color:var(--primary); margin-bottom:15px; font-size:1.1rem;">LOGGA SET 1</div>
+                <div id="current-set-label" style="text-align:center; font-weight:800; color:var(--primary); margin-bottom:15px; font-size:1.1rem; transition: color 0.3s;">LOGGA SET 1</div>
                 <div class="log-inputs">
                     <div class="stepper-group">
                         <span class="stepper-label" id="unit-label">reps</span>
@@ -200,7 +239,7 @@
                         <div class="stepper"><button onclick="step('kg',-2.5)">-</button><input type="number" id="in-kg" value="0" step="0.5" onchange="validateInput(this)"><button onclick="step('kg',2.5)">+</button></div>
                     </div>
                 </div>
-                <button class="btn-log-set" onclick="saveSet()">Spara set & nästa</button>
+                <button class="btn-log-set" id="btn-save-set" onclick="saveSet()">Spara set & nästa</button>
             </div>
             <div class="pills-container" id="today-pills" style="margin-top:15px;"></div>
             <button class="btn-next-ex" id="btn-next-ex" style="margin-top:20px;" onclick="nextEx()">Nästa övning</button>
@@ -231,7 +270,7 @@
         <div class="modal-content" onclick="event.stopPropagation()">
             <h3 style="margin-top:0;">PASSÖVERSIKT</h3>
             <div id="list-container"></div>
-            <button class="btn-log-set" style="margin-top:20px;" onclick="finishWorkout()">Avsluta passet nu</button>
+            <button class="btn-log-set" style="margin-top:20px; background:var(--danger);" onclick="finishWorkout()">Avsluta passet nu</button>
         </div>
     </div>
 
@@ -245,9 +284,15 @@
     </div>
 
     <div id="timer-overlay" class="timer-overlay">
-        <div id="timer-title" style="text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; opacity:0.7;">Vila</div>
-        <div id="timer-time" class="timer-time">00:00</div>
-        <button class="timer-skip" onclick="stopTimer()">Hoppa över</button>
+        <div id="timer-title" style="text-transform:uppercase; font-size:0.85rem; letter-spacing:1px; opacity:0.8;">Vila</div>
+        <div class="timer-circle-wrap">
+            <svg viewBox="0 0 160 160">
+                <circle class="timer-circle-bg" cx="80" cy="80" r="70"></circle>
+                <circle class="timer-circle-progress" id="timer-progress" cx="80" cy="80" r="70"></circle>
+            </svg>
+            <div id="timer-time" class="timer-time">00:00</div>
+        </div>
+        <button class="timer-skip" onclick="stopTimer()">Hoppa över vila</button>
     </div>
 
     <script>
@@ -255,7 +300,7 @@
         let wakeLock = null;
         async function requestWakeLock() {
             try { if ('wakeLock' in navigator) { wakeLock = await navigator.wakeLock.request('screen'); } } 
-            catch (err) { console.log(`Wake Lock error: ${err.name}, ${err.message}`); }
+            catch (err) { console.log(`Wake Lock error: ${err.message}`); }
         }
         function releaseWakeLock() {
             if (wakeLock !== null) { wakeLock.release().then(() => { wakeLock = null; }); }
@@ -289,10 +334,17 @@
             } catch(e) {}
         }
 
+        // --- 1RM CALCULATOR (EPLEY) ---
+        function calc1RM(kg, reps) {
+            let k = parseFloat(kg); let r = parseInt(reps);
+            if(isNaN(k) || isNaN(r) || r < 1 || k <= 0) return 0;
+            return Math.round(k * (1 + (r / 30)));
+        }
+
         const exInfo = {
             "Militärpress": { icon: "fa-arrow-up", primary: "Axlar", secondary: "Triceps", desc: "Pressa stången från bröstet till raka armar över huvudet.", focus: "Spänn mage och säte max. Ingen svank!", link: "https://www.youtube.com/results?search_query=Squat+University+strict+military+press", unit: "reps" },
             "Chins": { icon: "fa-arrow-down", primary: "Rygg", secondary: "Biceps", desc: "Dra dig upp till hakan passerar stången.", focus: "Använd väst om du klarar >10.", link: "https://www.youtube.com/results?search_query=Squat+University+pull+up", unit: "reps" },
-            "Skivstångsrodd": { icon: "fa-arrow-left-long", primary: "Rygg", secondary: "Baksida axlar", desc: "Fäll framåt, dra stången mot naveln.", focus: "Ryggen måste vara spikrak.", link: "https://www.youtube.com/results?search_query=alan+thrall+barbell+row", unit: "reps" },
+            "Skivstångsrodd": { icon: "fa-arrow-left-long", primary: "Rygg", secondary: "Baksida axlar", desc: "Fäll framåt, dra stången mot naveln.", focus: "Håll ryggen spikrak.", link: "https://www.youtube.com/results?search_query=alan+thrall+barbell+row", unit: "reps" },
             "Farmers Walk": { icon: "fa-person-walking", primary: "Grepp", secondary: "Trapezius", desc: "Gå 20m med tunga vikter.", focus: "Korta, stabila steg. Bröstet upp.", link: "https://www.youtube.com/results?search_query=farmers+walk+technique", unit: "meter" },
             "Bear Hug": { icon: "fa-hands-holding-circle", primary: "Bål", secondary: "Underarmar", desc: "Gå 20m med tung säck/boll framför bröstet.", focus: "Håll vikten högt. Luta dig inte bakåt.", link: "https://www.youtube.com/results?search_query=bear+hug+carry+technique", unit: "meter" },
             "Hängande Knäuppdragningar": { icon: "fa-child-reaching", primary: "Mage", secondary: "Grepp", desc: "Dra upp knäna mot bröstet medan du hänger.", focus: "Svinga inte. Kontrollerad rörelse.", link: "https://www.youtube.com/results?search_query=hanging+knee+raises+strict", unit: "reps" },
@@ -306,10 +358,10 @@
         };
 
         const phases = [
-            { weeks: [22,23,24,25,26,27], name: "Fas 1: Bas", p2: { s:3, r:"10", rest:90, fw:"20", böjR:"10", markR:"8", sledW:"75", sledS:5 } },
-            { weeks: [28,29,30,31,32,33], name: "Fas 2: Max", p2: { s:5, r:"5", rest:180, fw:"20", böjR:"5", markR:"3", sledW:"90", sledS:6 } },
-            { weeks: [34,35,36,37,38,39], name: "Fas 3: Peak", p2: { s:3, r:"3", rest:240, fw:"20", böjR:"3", markR:"2", sledW:"100", sledS:4 } },
-            { weeks: [40], name: "Fas 4: Taper", p2: { s:2, r:"5", rest:120, fw:"20", böjR:"5", markR:"3", sledW:"85", sledS:3 } }
+            { weeks: [22,23,24,25,26,27], name: "Fas 1: Bas", theme: "#3b82f6", p2: { s:3, r:"10", rest:90, fw:"20", böjR:"10", markR:"8", sledW:"75", sledS:5 } },
+            { weeks: [28,29,30,31,32,33], name: "Fas 2: Max", theme: "#ef4444", p2: { s:5, r:"5", rest:180, fw:"20", böjR:"5", markR:"3", sledW:"90", sledS:6 } },
+            { weeks: [34,35,36,37,38,39], name: "Fas 3: Peak", theme: "#f59e0b", p2: { s:3, r:"3", rest:240, fw:"20", böjR:"3", markR:"2", sledW:"100", sledS:4 } },
+            { weeks: [40], name: "Fas 4: Taper", theme: "#10b981", p2: { s:2, r:"5", rest:120, fw:"20", böjR:"5", markR:"3", sledW:"85", sledS:3 } }
         ];
 
         const schedule = [];
@@ -323,46 +375,78 @@
                 let p4Detailed = w<40 ? "<strong>Alt A (Distans):</strong><br>45-60 min Powerwalk eller lätt jogg i kuperad terräng med 10kg väst för att vänja lederna.<br><br><strong>Alt B (EMOM 20 min - 10kg väst):</strong><br>Varje minut börjar du en ny övning. Vilan är den tid som blir över.<br><br>• <strong>Min 1:</strong> 15 Knäböj<br>• <strong>Min 2:</strong> 10 Armhävningar (bröstet i golvet)<br>• <strong>Min 3:</strong> 15 Utfallssteg<br>• <strong>Min 4:</strong> 10 Mage/Rygg-burpees (Handsläpp på mage, skuldror i golv på rygg)<br>• <em>Upprepa 5 varv!</em>" : 
                                         "<strong>Aktiv vila:</strong><br>Gå en lugn promenad på 30-40 minuter utan viktväst. Stretcha ordentligt. Ladda batterierna inför v.41.";
 
-                let pass1Desc = w<28 ? "15/15 + 80% Sprint" : (w<34 ? "Pyramid + 100% Sprint" : (w<40 ? "Underhåll + 100% Sprint" : "Lätt rörlighet & Sprint"));
-                let pass4Desc = w<40 ? "Aktiv Vila" : "Viktväst 10kg";
-
                 schedule.push({
-                    week: w, phaseName: phase.name,
+                    week: w, phaseName: phase.name, themeColor: phase.theme,
                     p1Detailed: p1Detailed, p4Detailed: p4Detailed,
                     passes: [
-                        { id: 1, name: "P1: Beep & Sprint", desc: pass1Desc, isGym: false },
+                        { id: 1, name: "P1: Beep & Sprint", desc: w<28 ? "15/15 + 80% Sprint" : (w<34 ? "Pyramid + 100% Sprint" : (w<40 ? "Underhåll + 100% Sprint" : "Lätt rörlighet & Sprint")), isGym: false },
                         { id: 2, name: "P2: Överkropp & Bål", desc: `${phase.p2.s}x${phase.p2.r} | + Core & Rörlighet`, isGym: true, setup: phase.p2 },
                         { id: 3, name: "P3: Ben & Släde", desc: `Släddrag: ${phase.p2.sledW}kg | + Core`, isGym: true, setup: phase.p2 },
-                        { id: 4, name: "P4: Taktisk Tålighet", desc: pass4Desc, isGym: false }
+                        { id: 4, name: "P4: Taktisk Tålighet", desc: w<40 ? "Viktväst 10kg" : "Aktiv Vila", isGym: false }
                     ]
                 });
             });
         });
 
-        /* SÄKER SPARDATA-NYCKEL - BEHÅLLS MELLAN UPPDATERINGAR */
+        /* DATA LOGIC */
         let appData = JSON.parse(localStorage.getItem('polisfys_data_v16')) || { logs: {} };
-        function save() { localStorage.setItem('polisfys_data_v16', JSON.stringify(appData)); }
+        function save() { localStorage.setItem('polisfys_data_v16', JSON.stringify(appData)); updateDashboard(); }
+
+        /* THEME APPLIER */
+        function applyTheme(hexColor) {
+            document.documentElement.style.setProperty('--primary', hexColor || '#3b82f6');
+        }
+
+        /* DASHBOARD LOGIC */
+        function updateDashboard() {
+            // Target date: Måndag V.41 2026 -> 5 Oktober 2026
+            const targetDate = new Date('2026-10-05T00:00:00');
+            const now = new Date();
+            const diffTime = targetDate - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const wks = Math.floor(diffDays / 7);
+            const dys = diffDays % 7;
+            
+            let timeStr = "Testerna är igång!";
+            if (diffDays > 0) { timeStr = `${wks}v ${dys}d kvar`; }
+            document.getElementById('dash-countdown').innerText = timeStr;
+
+            // Progress Bar
+            let totalPasses = schedule.length * 4;
+            let completed = 0;
+            schedule.forEach(d => {
+                const wId = `w${d.week}`;
+                if(appData[wId]) {
+                    for(let i=1; i<=4; i++) { if(appData[wId][`p${i}`]) completed++; }
+                }
+            });
+            const pct = Math.round((completed / totalPasses) * 100);
+            document.getElementById('dash-progress').style.width = `${pct}%`;
+            document.getElementById('dash-progress-text').innerText = `${pct}% Genomfört (${completed}/${totalPasses})`;
+        }
 
         function renderSchema() {
+            applyTheme('#3b82f6'); // Base schema theme
+            updateDashboard();
             const container = document.getElementById('weeks-container');
             container.innerHTML = '';
             schedule.forEach(d => {
                 const wId = `w${d.week}`;
                 if(!appData[wId]) appData[wId] = {p1:false,p2:false,p3:false,p4:false};
-                let html = `<div class="week-card"><div class="week-header"><span>VECKA ${d.week}</span><span class="phase-badge">${d.phaseName}</span></div>`;
+                
+                let html = `<div class="week-card" style="border-left: 4px solid ${d.themeColor};"><div class="week-header"><span>VECKA ${d.week}</span><span class="phase-badge" style="color:${d.themeColor}; background:rgba(0,0,0,0.2);">${d.phaseName}</span></div>`;
                 
                 d.passes.forEach(p => {
                     const checked = appData[wId][`p${p.id}`];
                     let btnHtml = '';
-                    
                     if (p.isGym) {
-                        if (!checked) btnHtml = `<button class="start-btn" onclick="startWorkout(${d.week},${p.id}); event.stopPropagation();">KÖR</button>`;
+                        if (!checked) btnHtml = `<button class="start-btn" style="background:${d.themeColor};" onclick="startWorkout(${d.week},${p.id}); event.stopPropagation();">KÖR</button>`;
                     } else {
-                        btnHtml = `<button class="start-btn info-btn-pass" onclick="showPassInfo(${d.week},${p.id}); event.stopPropagation();"><i class="fa-solid fa-circle-info" style="margin-right:5px;"></i>INFO</button>`;
+                        btnHtml = `<button class="start-btn info-btn-pass" style="color:${d.themeColor}; border-color:${d.themeColor};" onclick="showPassInfo(${d.week},${p.id}); event.stopPropagation();"><i class="fa-solid fa-circle-info"></i>INFO</button>`;
                     }
 
                     html += `<div class="pass-row" onclick="toggle(${d.week},${p.id})">
-                        <div class="pass-info"><div class="checkbox ${checked?'checked':''}">${checked?'<i class="fa-solid fa-check"></i>':''}</div>
+                        <div class="pass-info"><div class="checkbox ${checked?'checked':''}" style="${checked?'background-color:'+d.themeColor+';border-color:'+d.themeColor:''}">${checked?'<i class="fa-solid fa-check"></i>':''}</div>
                         <div class="pass-details"><h4>${p.name}</h4><p>${p.desc}</p></div></div>
                         ${btnHtml}
                     </div>`;
@@ -378,27 +462,27 @@
             document.getElementById(id).classList.add('active');
             document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
             if(id=='stats') updateChart();
+            if(id=='schema') renderSchema();
         }
 
         function showPassInfo(week, passId) {
             const d = schedule.find(w => w.week === week);
-            const passName = passId == 1 ? "P1: Beep & Sprint" : "P4: Taktisk Tålighet";
-            const details = passId == 1 ? d.p1Detailed : d.p4Detailed;
-            
-            document.getElementById('pi-title').innerText = passName;
+            applyTheme(d.themeColor);
+            document.getElementById('pi-title').innerText = passId == 1 ? "P1: Beep & Sprint" : "P4: Taktisk Tålighet";
             document.getElementById('pi-subtitle').innerText = `VECKA ${week} | ${d.phaseName}`;
-            document.getElementById('pi-desc').innerHTML = details;
+            document.getElementById('pi-desc').innerHTML = passId == 1 ? d.p1Detailed : d.p4Detailed;
             document.getElementById('pass-info-modal').style.display = 'flex';
         }
 
         /* WORKOUT ENGINE */
-        let cur = null; let timerInt = null; let isExerciseRest = false;
+        let cur = null; let timerInt = null; let isExerciseRest = false; let maxDash = 440;
         
         function startWorkout(w, p) {
             requestWakeLock();
             initAudio(); 
-            
             const d = schedule.find(x => x.week === w);
+            applyTheme(d.themeColor);
+
             const setup = d.passes.find(x => x.id === p).setup;
             let exs = [];
             if(p==2) exs = [
@@ -435,12 +519,22 @@
             document.getElementById('ex-target-display').innerText = `PLANERAT: ${ex.s} SET x ${ex.r} ${unit.toUpperCase()}`;
             document.getElementById('unit-label').innerText = unit;
 
-            // History
+            // History with 1RM
             let hist = []; 
             for(let week=cur.w-1; week>=22; week--) {
                 const id = `w${week}_p${cur.p}`;
                 if(appData.logs[id]) {
-                    for(let s=1; s<=6; s++) { const l = appData.logs[id][`${ex.n}_s${s}`]; if(l) hist.push(`${l.r}${unitStr} x ${l.k}kg`); }
+                    for(let s=1; s<=6; s++) { 
+                        const l = appData.logs[id][`${ex.n}_s${s}`]; 
+                        if(l) {
+                            let ormStr = "";
+                            if(unit === 'reps' && parseFloat(l.k) > 0) {
+                                const orm = calc1RM(l.k, l.r);
+                                if(orm > 0) ormStr = `<span class="orm">(Max: ${orm}kg)</span>`;
+                            }
+                            hist.push(`${l.r}${unitStr} x ${l.k}kg ${ormStr}`);
+                        }
+                    }
                     if(hist.length>0) break;
                 }
             }
@@ -461,9 +555,21 @@
             document.getElementById('current-set-ui').style.display = nextS <= ex.s ? 'block' : 'none';
             
             const nBtn = document.getElementById('btn-next-ex');
-            if(cur.idx == cur.exs.length-1) { nBtn.innerText="Avsluta pass"; nBtn.style.background="var(--danger)"; nBtn.style.color="white"; nBtn.onclick=finishWorkout; }
-            else { nBtn.innerText="Nästa övning"; nBtn.style.background="var(--surface-light)"; nBtn.style.color="var(--text-main)"; nBtn.onclick=nextEx; }
+            if(cur.idx == cur.exs.length-1) { 
+                nBtn.innerText="Avsluta pass"; 
+                nBtn.style.background="var(--secondary)"; 
+                nBtn.style.color="var(--bg-color)"; 
+                nBtn.onclick=triggerSuccess; 
+            } else { 
+                nBtn.innerText="Nästa övning"; 
+                nBtn.style.background="var(--surface-light)"; 
+                nBtn.style.color="var(--text-main)"; 
+                nBtn.onclick=nextEx; 
+            }
             
+            const saveBtn = document.getElementById('btn-save-set');
+            saveBtn.style.background = "var(--primary)";
+
             // Prefill
             if(nextS <= ex.s) {
                 document.getElementById('in-reps').value = String(ex.r).replace('s','');
@@ -492,8 +598,18 @@
         }
 
         function nextEx() { cur.idx++; stopTimer(); renderEx(); }
+        
+        function triggerSuccess() {
+            document.getElementById('success-overlay').style.display = 'flex';
+            playBeep(600, 0.1, 'square'); setTimeout(()=>playBeep(800, 0.2, 'square'), 150);
+            setTimeout(() => {
+                document.getElementById('success-overlay').style.display = 'none';
+                finishWorkout();
+            }, 2000);
+        }
+
         function finishWorkout() { appData[`w${cur.w}`][`p${cur.p}`] = true; save(); renderSchema(); closeWorkout(); }
-        function closeWorkout() { releaseWakeLock(); document.getElementById('workout-player').style.display='none'; cur=null; stopTimer(); }
+        function closeWorkout() { releaseWakeLock(); document.getElementById('workout-player').style.display='none'; cur=null; stopTimer(); renderSchema(); }
         
         function openExerciseList() {
             let h = ''; cur.exs.forEach((e,i) => {
@@ -520,16 +636,28 @@
             document.getElementById('info-modal').style.display='flex';
         }
 
-        /* TIMER MED BEEP */
+        /* CIRCULAR TIMER MED BEEP */
+        let totalTime = 0;
         function startTimer(s, title="Vila", isExRest=false) {
-            clearInterval(timerInt); document.getElementById('timer-title').innerText = title;
+            clearInterval(timerInt); 
+            document.getElementById('timer-title').innerText = title;
             document.getElementById('timer-overlay').classList.add('active');
             isExerciseRest = isExRest;
-            let left = s; updateT(left);
+            let left = s; totalTime = s;
+            updateT(left);
             
+            const circle = document.getElementById('timer-progress');
+            circle.style.transition = 'none';
+            circle.style.strokeDashoffset = 0;
+            
+            setTimeout(() => { circle.style.transition = 'stroke-dashoffset 1s linear'; }, 50);
+
             timerInt = setInterval(() => {
                 left--; updateT(left);
                 
+                const pct = left / totalTime;
+                circle.style.strokeDashoffset = maxDash - (pct * maxDash);
+
                 if (left > 0) {
                     if (isExerciseRest && left <= 10) playBeep(440, 0.1);
                     else if (!isExerciseRest && left <= 5) playBeep(440, 0.1);
@@ -545,7 +673,7 @@
 
         /* CHARTS */
         function updateChart() {
-            if (typeof Chart === 'undefined') { console.warn("Chart.js är inte laddat (kanske offline)."); return; }
+            if (typeof Chart === 'undefined') return;
             const ctx = document.getElementById('progressionChart');
             if (!ctx) return;
             const ws = [22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40];
@@ -575,15 +703,13 @@
             return s;
         }
         function toggleSimulator() {
-            initAudio(); 
-            const b = document.getElementById('btn-sim-toggle'); 
-            const r = document.getElementById('runner'); 
-            const track = document.getElementById('track');
+            initAudio(); applyTheme('#10b981');
+            const b = document.getElementById('btn-sim-toggle'); const r = document.getElementById('runner'); const track = document.getElementById('track');
             if(!track || !r || !b) return;
 
             if(isRunning) { 
                 clearInterval(simInt); isRunning=false; r.style.transition = 'none'; r.style.left='10%'; b.innerText="Starta Simulering"; b.style.background="var(--primary)"; 
-                releaseWakeLock(); 
+                releaseWakeLock(); applyTheme('#3b82f6');
             } else {
                 requestWakeLock(); 
                 const s = updateSimStats(); b.innerText="Stoppa Simulering"; b.style.background="var(--danger)"; isRunning=true;
@@ -599,7 +725,7 @@
             }
         }
 
-        /* BACKUP */
+        /* BACKUP & CSV */
         function exportData() { document.getElementById('data-box').value = btoa(unescape(encodeURIComponent(JSON.stringify(appData)))); }
         function importBackupString() {
             const str = document.getElementById('data-box').value.trim();
@@ -608,6 +734,29 @@
                 const parsed = JSON.parse(decodeURIComponent(escape(atob(str))));
                 if(confirm("Vill du skriva över din nuvarande logg med denna backup?")) { appData = parsed; save(); renderSchema(); alert("Importen lyckades!"); }
             } catch(e) { alert("Felaktig backup-kod."); }
+        }
+        
+        function exportCSV() {
+            let csv = "Vecka,Pass,Övning,Set,Reps,Vikt(kg),Est.1RM\n";
+            for(let key in appData.logs) {
+                if(key.includes("_p")) {
+                    const parts = key.split('_'); const w = parts[0].replace('w',''); const p = parts[1].replace('p','');
+                    const pLogs = appData.logs[key];
+                    for(let lKey in pLogs) {
+                        if(!lKey.includes('_done')) {
+                            const exSet = lKey.split('_s');
+                            if(exSet.length === 2) {
+                                const ex = exSet[0]; const s = exSet[1]; const data = pLogs[lKey];
+                                let orm = ""; if(!exInfo[ex].unit || exInfo[ex].unit === 'reps') orm = calc1RM(data.k, data.r) || "";
+                                csv += `${w},${p},${ex},${s},${data.r},${data.k},${orm}\n`;
+                            }
+                        }
+                    }
+                }
+            }
+            const blob = new Blob(["\uFEFF"+csv], { type: 'text/csv;charset=utf-8;' }); // BOM for Excel Swedish chars
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = "Polisfys_Export.csv"; a.click();
         }
 
         renderSchema(); updateSimStats();
