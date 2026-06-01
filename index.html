@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1320">
     <link rel="apple-touch-icon" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/solid/crosshairs.svg">
-    <title>Polisfys Taktisk V16</title>
+    <title>Polisfys Taktisk V17</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -122,7 +122,7 @@
 <body>
 
     <header>
-        <h1>Polisfys HT25 - V16</h1>
+        <h1>Polisfys HT25 - V17</h1>
         <i class="fa-solid fa-crosshairs"></i>
     </header>
 
@@ -275,22 +275,24 @@
         }
         function playBeep(freq, duration, type='sine') {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
-            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
         }
 
         const exInfo = {
             "Militärpress": { icon: "fa-arrow-up", primary: "Axlar", secondary: "Triceps", desc: "Pressa stången från bröstet till raka armar över huvudet.", focus: "Spänn mage och säte max. Ingen svank!", link: "https://www.youtube.com/results?search_query=Squat+University+strict+military+press", unit: "reps" },
             "Chins": { icon: "fa-arrow-down", primary: "Rygg", secondary: "Biceps", desc: "Dra dig upp till hakan passerar stången.", focus: "Använd väst om du klarar >10.", link: "https://www.youtube.com/results?search_query=Squat+University+pull+up", unit: "reps" },
-            "Skivstångsrodd": { icon: "fa-arrow-left-long", primary: "Rygg", secondary: "Baksida axlar", desc: "Fäll framåt, dra stången mot naveln.", focus: "Håll ryggen spikrak.", link: "https://www.youtube.com/results?search_query=alan+thrall+barbell+row", unit: "reps" },
+            "Skivstångsrodd": { icon: "fa-arrow-left-long", primary: "Rygg", secondary: "Baksida axlar", desc: "Fäll framåt, dra stången mot naveln.", focus: "Ryggen måste vara spikrak.", link: "https://www.youtube.com/results?search_query=alan+thrall+barbell+row", unit: "reps" },
             "Farmers Walk": { icon: "fa-person-walking", primary: "Grepp", secondary: "Trapezius", desc: "Gå 20m med tunga vikter.", focus: "Korta, stabila steg. Bröstet upp.", link: "https://www.youtube.com/results?search_query=farmers+walk+technique", unit: "meter" },
             "Bear Hug": { icon: "fa-hands-holding-circle", primary: "Bål", secondary: "Underarmar", desc: "Gå 20m med tung säck/boll framför bröstet.", focus: "Håll vikten högt. Luta dig inte bakåt.", link: "https://www.youtube.com/results?search_query=bear+hug+carry+technique", unit: "meter" },
             "Hängande Knäuppdragningar": { icon: "fa-child-reaching", primary: "Mage", secondary: "Grepp", desc: "Dra upp knäna mot bröstet medan du hänger.", focus: "Svinga inte. Kontrollerad rörelse.", link: "https://www.youtube.com/results?search_query=hanging+knee+raises+strict", unit: "reps" },
@@ -434,7 +436,7 @@
             document.getElementById('unit-label').innerText = unit;
 
             // History
-            let hist = []; let maxW = -1;
+            let hist = []; 
             for(let week=cur.w-1; week>=22; week--) {
                 const id = `w${week}_p${cur.p}`;
                 if(appData.logs[id]) {
@@ -568,14 +570,17 @@
         function updateSimStats() {
             const l = parseInt(document.getElementById('sim-level').value);
             const kmh = 8.5 + (l-1)*0.5; const s = 20/(kmh/3.6);
-            document.getElementById('stat-speed').innerText = `${kmh.toFixed(1)} km/h`;
-            document.getElementById('stat-time').innerText = `${s.toFixed(2)}s / vända`;
+            const simStatsLabel = document.getElementById('sim-stats');
+            if(simStatsLabel) { simStatsLabel.innerText = `${kmh.toFixed(1)} km/h | ${s.toFixed(2)}s / vända`; }
             return s;
         }
         function toggleSimulator() {
             initAudio(); 
-            const b = document.getElementById('btn-sim-toggle'); const r = document.getElementById('runner'); const track = document.getElementById('track');
-            if(!track) return;
+            const b = document.getElementById('btn-sim-toggle'); 
+            const r = document.getElementById('runner'); 
+            const track = document.getElementById('track');
+            if(!track || !r || !b) return;
+
             if(isRunning) { 
                 clearInterval(simInt); isRunning=false; r.style.transition = 'none'; r.style.left='10%'; b.innerText="Starta Simulering"; b.style.background="var(--primary)"; 
                 releaseWakeLock(); 
