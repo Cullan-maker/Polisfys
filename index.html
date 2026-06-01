@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1320">
     <link rel="apple-touch-icon" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/solid/crosshairs.svg">
-    
-    <title>Polisfys Taktisk V15</title>
+    <title>Polisfys Taktisk V16</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -29,11 +27,9 @@
             --muscle-primary: #ef4444; 
             --muscle-secondary: #f59e0b; 
         }
-        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 75px; overscroll-behavior-y: contain; }
+        body { margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-main); padding-bottom: 75px; overscroll-behavior-y: contain;}
         
-        /* Header & Nav */
         header { background-color: var(--surface); border-bottom: 1px solid var(--border); padding: 15px 20px; text-align: center; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
         header h1 { margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-main);}
         header i { color: var(--primary); }
@@ -43,12 +39,10 @@
         .nav-item.active { color: var(--primary); font-weight: 700; }
         .nav-item i { font-size: 1.3rem; margin-bottom: 5px; }
         
-        /* Screens */
         .screen { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Cards & Rows */
         .week-card { background: var(--surface); border-radius: 12px; padding: 15px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.2);}
         .week-header { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 12px; font-size: 1.1rem; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 10px;}
         .phase-badge { font-size: 0.75rem; background: rgba(59, 130, 246, 0.2); color: var(--primary); padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;}
@@ -61,7 +55,6 @@
         .pass-details h4 { margin: 0; font-size: 1rem; color: var(--text-main);}
         .pass-details p { margin: 4px 0 0; font-size: 0.8rem; color: var(--text-muted); }
         
-        /* Buttons */
         .start-btn { background: var(--primary); color: var(--text-main); border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; cursor: pointer; text-transform: uppercase;}
         .info-btn-pass { background: var(--surface-light); color: var(--primary); border: 1px solid var(--border); border-radius: 6px; padding: 5px 10px; display: flex; align-items: center; gap: 5px; }
 
@@ -77,7 +70,6 @@
         .ex-details p { margin: 0 0 10px 0; color: var(--primary); font-weight: 600; font-size: 0.9rem; }
         .tactical-link { color: var(--danger); font-size: 0.8rem; text-decoration: underline; cursor: pointer; }
 
-        /* Log Section */
         .log-section { padding: 20px; background: var(--surface); border-top-left-radius: 20px; border-top-right-radius: 20px; flex: 1; box-shadow: 0 -10px 20px rgba(0,0,0,0.2);}
         .history-section { margin-bottom: 20px; text-align: center; }
         .history-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;}
@@ -124,14 +116,13 @@
         .flash { animation: flashScreen 0.3s ease; }
         @keyframes flashScreen { 0% { background-color: rgba(255,255,255,0.2); } 100% { background-color: var(--track-green); } }
 
-        /* Data Sync Styles */
         .sync-textarea { width: 100%; height: 100px; background: var(--bg-color); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-family: monospace; font-size: 0.8rem; margin-top: 10px; resize: none;}
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Polisfys HT25</h1>
+        <h1>Polisfys HT25 - V16</h1>
         <i class="fa-solid fa-crosshairs"></i>
     </header>
 
@@ -153,7 +144,11 @@
                 <option value="15">Nivå 15 (Max)</option>
             </select>
             <div id="sim-stats" style="font-weight:700; color:var(--primary); margin-bottom:10px;">8.5 km/h | 8.47s / vända</div>
-            <div class="track-container" id="track"><div class="track-line" style="left:10%"></div><div class="track-line" style="right:10%"></div><div class="runner" id="runner"></div></div>
+            <div class="track-container" id="track">
+                <div class="track-line" style="left:10%"></div>
+                <div class="track-line" style="right:10%"></div>
+                <div class="runner" id="runner"></div>
+            </div>
             <button class="start-btn" id="btn-sim-toggle" style="width:100%; padding:15px;" onclick="toggleSimulator()">Starta Simulering</button>
         </div>
     </div>
@@ -272,8 +267,11 @@
         // --- AUDIO BEEP LOGIK ---
         let audioCtx = null;
         function initAudio() {
-            if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            if (!audioCtx) { 
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if(AudioContext) audioCtx = new AudioContext(); 
+            }
+            if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
         }
         function playBeep(freq, duration, type='sine') {
             if (!audioCtx) return;
@@ -324,7 +322,7 @@
                                         "<strong>Aktiv vila:</strong><br>Gå en lugn promenad på 30-40 minuter utan viktväst. Stretcha ordentligt. Ladda batterierna inför v.41.";
 
                 let pass1Desc = w<28 ? "15/15 + 80% Sprint" : (w<34 ? "Pyramid + 100% Sprint" : (w<40 ? "Underhåll + 100% Sprint" : "Lätt rörlighet & Sprint"));
-                let pass4Desc = w<40 ? "Viktväst 10kg" : "Aktiv Vila";
+                let pass4Desc = w<40 ? "Aktiv Vila" : "Viktväst 10kg";
 
                 schedule.push({
                     week: w, phaseName: phase.name,
@@ -339,9 +337,9 @@
             });
         });
 
-        /* NY EXAKT SPARNYCKEL FÖR ATT ALDRIG KROCKA MED UPPDATERINGAR */
-        let appData = JSON.parse(localStorage.getItem('polisfys_ht25_data')) || { logs: {} };
-        function save() { localStorage.setItem('polisfys_ht25_data', JSON.stringify(appData)); }
+        /* SÄKER SPARDATA-NYCKEL - BEHÅLLS MELLAN UPPDATERINGAR */
+        let appData = JSON.parse(localStorage.getItem('polisfys_data_v16')) || { logs: {} };
+        function save() { localStorage.setItem('polisfys_data_v16', JSON.stringify(appData)); }
 
         function renderSchema() {
             const container = document.getElementById('weeks-container');
@@ -377,7 +375,7 @@
             document.querySelectorAll('.screen, .nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
-            if(id=='stats-screen') updateChart();
+            if(id=='stats') updateChart();
         }
 
         function showPassInfo(week, passId) {
@@ -453,7 +451,7 @@
                 const l = appData.logs[cur.wId][`${ex.n}_s${s}`];
                 if(l) today.push(`<span class="pill active"><i class="fa-solid fa-check"></i> ${l.r}${unitStr} x ${l.k}kg</span>`);
             }
-            let foundNext = false; for(let s=1; s<=ex.s; s++){ if(!appData.logs[cur.wId][`${ex.n}_s${s}`]){ nextS = s; foundNext=true; break;}}
+            let foundNext = false; for(let s=1; s<=ex.s; s++){ if(!appData.logs[cur.wId][`${ex.n}_s${s}_done`]){ nextS = s; foundNext=true; break;}}
             if(!foundNext) nextS = ex.s + 1;
 
             document.getElementById('today-pills').innerHTML = today.join('');
@@ -482,8 +480,9 @@
         function saveSet() {
             initAudio(); 
             const ex = cur.exs[cur.idx];
-            let s = 1; for(let i=1; i<=ex.s; i++){ if(!appData.logs[cur.wId][`${ex.n}_s${i}`]){ s=i; break; }}
+            let s = 1; for(let i=1; i<=ex.s; i++){ if(!appData.logs[cur.wId][`${ex.n}_s${i}_done`]){ s=i; break; }}
             appData.logs[cur.wId][`${ex.n}_s${s}`] = { r: document.getElementById('in-reps').value, k: document.getElementById('in-kg').value };
+            appData.logs[cur.wId][`${ex.n}_s${s}_done`] = true;
             save(); renderEx();
             
             if(s < ex.s && ex.t > 0) startTimer(ex.t, "Vila till nästa set", false);
@@ -496,7 +495,7 @@
         
         function openExerciseList() {
             let h = ''; cur.exs.forEach((e,i) => {
-                let done = 0; for(let s=1; s<=e.s; s++) if(appData.logs[cur.wId][`${e.n}_s${s}`]) done++;
+                let done = 0; for(let s=1; s<=e.s; s++) if(appData.logs[cur.wId][`${e.n}_s${s}_done`]) done++;
                 h += `<div class="ex-list-item ${i==cur.idx?'active':''}" onclick="cur.idx=${i}; document.getElementById('list-modal').style.display='none'; renderEx(); stopTimer();">
                     <div><div class="ex-list-name">${e.n}</div><div class="ex-list-status">${done}/${e.s} set klara</div></div>
                     <div class="ex-list-icon"><i class="fa-solid ${done==e.s?'fa-check-circle':'fa-chevron-right'}" style="${done==e.s?'color:var(--secondary)':''}"></i></div>
@@ -514,8 +513,8 @@
             document.getElementById('m-sec').innerText = `Sekundär: ${i.secondary}`;
             document.getElementById('m-desc').innerText = i.desc;
             document.getElementById('m-focus').innerText = i.focus;
-            const linkBtn = document.getElementById('modal-video-link');
-            if(i.link) { linkBtn.href = i.link; linkBtn.style.display = 'block'; } else { linkBtn.style.display = 'none'; }
+            const linkBtn = document.getElementById('m-link');
+            if(i.link) { linkBtn.href = i.link; linkBtn.parentElement.style.display = 'block'; } else { linkBtn.parentElement.style.display = 'none'; }
             document.getElementById('info-modal').style.display='flex';
         }
 
@@ -530,11 +529,11 @@
                 left--; updateT(left);
                 
                 if (left > 0) {
-                    if (isExerciseRest && left <= 10) playBeep(440, 0.2);
-                    else if (!isExerciseRest && left <= 5) playBeep(440, 0.2);
+                    if (isExerciseRest && left <= 10) playBeep(440, 0.1);
+                    else if (!isExerciseRest && left <= 5) playBeep(440, 0.1);
                 } else if (left <= 0) { 
                     stopTimer(); 
-                    playBeep(880, 0.8, 'square'); 
+                    playBeep(880, 0.6, 'square'); 
                     try{navigator.vibrate([300,100,300,100,300]);}catch(e){} 
                 }
             }, 1000);
@@ -544,10 +543,12 @@
 
         /* CHARTS */
         function updateChart() {
+            if (typeof Chart === 'undefined') { console.warn("Chart.js är inte laddat (kanske offline)."); return; }
             const ctx = document.getElementById('progressionChart');
+            if (!ctx) return;
             const ws = [22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40];
             const getM = (ex) => ws.map(w => {
-                let m = 0; [2,3].forEach(p => { const id=`w${w}_p${p}`; if(appData.logs[id]) for(let s=1; s<=6; s++) { const l=appData.logs[id][`${ex}_s${s}`]; if(l) m=Math.max(m, parseFloat(l.k)); }});
+                let m = 0; [2,3].forEach(p => { const id=`w${w}_p${p}`; if(appData.logs[id]) for(let s=1; s<=6; s++) { const l=appData.logs[id][`${ex}_s${s}`]; if(l && l.k) m=Math.max(m, parseFloat(l.k)); }});
                 return m > 0 ? m : null;
             });
             if(window.pChart) window.pChart.destroy();
@@ -574,6 +575,7 @@
         function toggleSimulator() {
             initAudio(); 
             const b = document.getElementById('btn-sim-toggle'); const r = document.getElementById('runner'); const track = document.getElementById('track');
+            if(!track) return;
             if(isRunning) { 
                 clearInterval(simInt); isRunning=false; r.style.transition = 'none'; r.style.left='10%'; b.innerText="Starta Simulering"; b.style.background="var(--primary)"; 
                 releaseWakeLock(); 
@@ -585,7 +587,7 @@
                 simInt = setInterval(() => { 
                     track.classList.add('flash'); 
                     setTimeout(() => track.classList.remove('flash'), 150); 
-                    playBeep(700, 0.3, 'square'); 
+                    playBeep(700, 0.2, 'square'); 
                     try{navigator.vibrate(150);}catch(e){} 
                     right = !right; r.style.left = right ? 'calc(90% - 24px)' : '10%'; 
                 }, s * 1000);
