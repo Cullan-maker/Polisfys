@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <!-- PWA / NATIVE APP META TAGS -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1320">
     <link rel="apple-touch-icon" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/solid/crosshairs.svg">
     
-    <title>Polisfys Taktisk V18</title>
+    <title>Polisfys Taktisk V19</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -19,7 +20,7 @@
             --bg-color: #0b1320; 
             --surface: #152238; 
             --surface-light: #1e2f4d;
-            --primary: #3b82f6; /* Standard Blue, dynamically changes */
+            --primary: #3b82f6; 
             --secondary: #10b981; 
             --danger: #ef4444;
             --text-main: #f8fafc;
@@ -140,7 +141,7 @@
 <body>
 
     <header>
-        <h1>Polisfys HT26 - V18</h1>
+        <h1>Polisfys HT26 - V19</h1>
         <i class="fa-solid fa-crosshairs"></i>
     </header>
 
@@ -151,6 +152,7 @@
 
     <div id="schema" class="screen active">
         
+        <!-- DASHBOARD -->
         <div class="week-card dashboard-card">
             <div style="font-size:0.8rem; color:var(--text-main); opacity:0.8; font-weight:600; text-transform:uppercase; display:flex; justify-content:space-between;">
                 <span>Mål: Fystest V.41</span>
@@ -209,6 +211,7 @@
         <div class="nav-item" onclick="switchTab('stats')"><i class="fa-solid fa-chart-line"></i><span>Stats</span></div>
     </nav>
 
+    <!-- PLAYER -->
     <div id="workout-player">
         <div class="wp-top-bar">
             <button onclick="closeWorkout()"><i class="fa-solid fa-xmark"></i></button>
@@ -246,6 +249,7 @@
         </div>
     </div>
 
+    <!-- INFO MODALS -->
     <div id="info-modal" class="modal-overlay" onclick="this.style.display='none'">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="document.getElementById('info-modal').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
@@ -399,7 +403,6 @@
 
         /* DASHBOARD LOGIC */
         function updateDashboard() {
-            // Target date: Måndag V.41 2026 -> 5 Oktober 2026
             const targetDate = new Date('2026-10-05T00:00:00');
             const now = new Date();
             const diffTime = targetDate - now;
@@ -411,7 +414,6 @@
             if (diffDays > 0) { timeStr = `${wks}v ${dys}d kvar`; }
             document.getElementById('dash-countdown').innerText = timeStr;
 
-            // Progress Bar
             let totalPasses = schedule.length * 4;
             let completed = 0;
             schedule.forEach(d => {
@@ -426,7 +428,7 @@
         }
 
         function renderSchema() {
-            applyTheme('#3b82f6'); // Base schema theme
+            applyTheme('#3b82f6'); 
             updateDashboard();
             const container = document.getElementById('weeks-container');
             container.innerHTML = '';
@@ -474,8 +476,9 @@
             document.getElementById('pass-info-modal').style.display = 'flex';
         }
 
-        /* WORKOUT ENGINE */
+        /* WORKOUT ENGINE (EDIT FUNKTION I V19) */
         let cur = null; let timerInt = null; let isExerciseRest = false; let maxDash = 440;
+        let editingSet = null; // <- V19 ny variabel
         
         function startWorkout(w, p) {
             requestWakeLock();
@@ -503,12 +506,31 @@
                 {n:"Couch Stretch", s:2, r:"60", t:0}
             ];
             cur = { w, p, exs, idx: 0, wId: `w${w}_p${p}` };
+            editingSet = null;
             if(!appData.logs[cur.wId]) appData.logs[cur.wId] = {};
             document.getElementById('workout-player').style.display='flex';
             renderEx();
         }
 
+        // V19 NY FUNKTION: Starta redigering av set
+        function editSet(setNum) {
+            editingSet = setNum;
+            const ex = cur.exs[cur.idx];
+            const logData = appData.logs[cur.wId][`${ex.n}_s${setNum}`];
+            
+            document.getElementById('in-reps').value = String(logData.r).replace('s','');
+            document.getElementById('in-kg').value = logData.k;
+            
+            document.getElementById('current-set-label').innerText = `REDIGERA SET ${setNum}`;
+            document.getElementById('current-set-ui').style.display = 'block';
+            
+            const btn = document.getElementById('btn-save-set');
+            btn.innerText = "Uppdatera set";
+            btn.style.background = "var(--secondary)";
+        }
+
         function renderEx() {
+            editingSet = null; // Återställ edit-läge vid sidladdning
             const ex = cur.exs[cur.idx];
             const unit = exInfo[ex.n].unit || 'reps';
             const unitStr = unit === 'reps' ? '' : (unit === 'meter' ? 'm' : 's');
@@ -541,11 +563,11 @@
             document.getElementById('hist-label').innerText = hist.length ? "Senaste resultaten" : "Ingen historik";
             document.getElementById('hist-pills').innerHTML = hist.map(h => `<span class="pill">${h}</span>`).join('');
 
-            // Today
+            // Today (V19: Added onclick to trigger editSet)
             let today = []; let nextS = 1;
             for(let s=1; s<=ex.s; s++) {
                 const l = appData.logs[cur.wId][`${ex.n}_s${s}`];
-                if(l) today.push(`<span class="pill active"><i class="fa-solid fa-check"></i> ${l.r}${unitStr} x ${l.k}kg</span>`);
+                if(l) today.push(`<span class="pill active" style="cursor:pointer;" onclick="editSet(${s})"><i class="fa-solid fa-pen-to-square" style="margin-right:4px;"></i> ${l.r}${unitStr} x ${l.k}kg</span>`);
             }
             let foundNext = false; for(let s=1; s<=ex.s; s++){ if(!appData.logs[cur.wId][`${ex.n}_s${s}_done`]){ nextS = s; foundNext=true; break;}}
             if(!foundNext) nextS = ex.s + 1;
@@ -568,6 +590,7 @@
             }
             
             const saveBtn = document.getElementById('btn-save-set');
+            saveBtn.innerText = "Spara set & nästa";
             saveBtn.style.background = "var(--primary)";
 
             // Prefill
@@ -588,13 +611,25 @@
         function saveSet() {
             initAudio(); 
             const ex = cur.exs[cur.idx];
-            let s = 1; for(let i=1; i<=ex.s; i++){ if(!appData.logs[cur.wId][`${ex.n}_s${i}_done`]){ s=i; break; }}
+            
+            let s = editingSet;
+            if(!s) {
+                s = 1; for(let i=1; i<=ex.s; i++){ if(!appData.logs[cur.wId][`${ex.n}_s${i}_done`]){ s=i; break; }}
+            }
+
             appData.logs[cur.wId][`${ex.n}_s${s}`] = { r: document.getElementById('in-reps').value, k: document.getElementById('in-kg').value };
             appData.logs[cur.wId][`${ex.n}_s${s}_done`] = true;
-            save(); renderEx();
+            save(); 
             
-            if(s < ex.s && ex.t > 0) startTimer(ex.t, "Vila till nästa set", false);
-            else if(s == ex.s && cur.idx < cur.exs.length-1) startTimer(120, "Vila till nästa övning", true);
+            let wasEditing = (editingSet !== null);
+            editingSet = null; 
+            renderEx();
+            
+            // Starta bara timer om du inte redigerade ett gammalt set
+            if(!wasEditing) {
+                if(s < ex.s && ex.t > 0) startTimer(ex.t, "Vila till nästa set", false);
+                else if(s == ex.s && cur.idx < cur.exs.length-1) startTimer(120, "Vila till nästa övning", true);
+            }
         }
 
         function nextEx() { cur.idx++; stopTimer(); renderEx(); }
@@ -754,7 +789,7 @@
                     }
                 }
             }
-            const blob = new Blob(["\uFEFF"+csv], { type: 'text/csv;charset=utf-8;' }); // BOM for Excel Swedish chars
+            const blob = new Blob(["\uFEFF"+csv], { type: 'text/csv;charset=utf-8;' }); 
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a'); a.href = url; a.download = "Polisfys_Export.csv"; a.click();
         }
